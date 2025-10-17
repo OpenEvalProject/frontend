@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenEvalProject - Transparent LLM-Enabled Peer Review</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>OpenEvalProject</h1>
+        <nav>
+            <span id="user-info"><!-- Populated by JS --></span>
+            <button id="login-btn">Login with ORCID</button>
+            <button id="logout-btn" style="display:none;">Logout</button>
+            <a href="/submit.html" id="submit-link" style="display:none;">
+                <button>Submit New Paper</button>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="intro">
+            <p>The OpenEvalProject provides transparent, systematic evaluation of large language model (LLM) performance in scientific peer review. We compare LLM-generated reviews against traditional peer reviews to assess their accuracy, consistency, and reliability in identifying claims and evaluating scientific evidence.</p>
+            <p>Explore our dataset of manuscripts below. Click any paper to view detailed claim-by-claim comparisons between LLM and peer reviewer assessments.</p>
+        </section>
+
+        <section class="papers-table">
+            <h2>Processed Manuscripts</h2>
+            <table id="papers-list">
+                <thead>
+                    <tr>
+                        <th>Date Added</th>
+                        <th>Article Title</th>
+                        <th>Total Claims</th>
+                        <th>LLM Results</th>
+                        <th>Peer Results</th>
+                        <th>Comparisons</th>
+                        <th>Agree</th>
+                        <th>Partial</th>
+                        <th>Disagree</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="loading">Loading manuscripts...</div>
+            <div id="no-papers" style="display:none;">No manuscripts have been processed yet.</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>OpenEvalProject - Transparent LLM-enabled peer review assessment</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js?v=2"></script>
+    <script src="/js/index.js?v=2"></script>
+</body>
+</html>

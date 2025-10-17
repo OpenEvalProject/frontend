@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuscript Analysis - OpenEvalProject</title>
+    <link rel="stylesheet" href="/css/styles.css?v=16">
+</head>
+<body>
+    <header>
+        <h1>OpenEvalProject</h1>
+        <nav>
+            <a href="/index.html">← Back to Manuscripts</a>
+            <span id="user-info"></span>
+            <button id="login-btn">Login with ORCID</button>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading">Loading manuscript analysis...</div>
+        <div id="error" style="display:none;"></div>
+
+        <section id="manuscript-details" style="display:none;">
+            <!-- Paper Overview -->
+            <div class="paper-overview">
+                <h2 id="manuscript-title"></h2>
+                <div class="paper-metadata">
+                    <p><strong>Manuscript ID:</strong> <span id="manuscript-id"></span></p>
+                    <p><strong>DOI:</strong> <span id="manuscript-doi"></span></p>
+                    <p><strong>Date Added:</strong> <span id="manuscript-date"></span></p>
+                </div>
+            </div>
+
+            <!-- Summary Stats - Now Interactive Toggles -->
+            <section class="summary-stats">
+                <div class="stats-grid">
+                    <div class="stat-card clickable" data-target="claims-container">
+                        <div class="stat-value" id="total-claims">0</div>
+                        <div class="stat-label">Total Claims</div>
+                        <div class="stat-hint">Click to view</div>
+                    </div>
+                    <div class="stat-card clickable" data-target="llm-results-container">
+                        <div class="stat-value" id="total-results-llm">0</div>
+                        <div class="stat-label">LLM Results</div>
+                        <div class="stat-hint">Click to view</div>
+                    </div>
+                    <div class="stat-card clickable" data-target="peer-results-container" id="peer-results-stat" style="display:none;">
+                        <div class="stat-value" id="total-results-peer">0</div>
+                        <div class="stat-label">Peer Results</div>
+                        <div class="stat-hint">Click to view</div>
+                    </div>
+                    <div class="stat-card clickable" data-target="comparison-section" id="comparisons-stat" style="display:none;">
+                        <div class="stat-value" id="total-comparisons">0</div>
+                        <div class="stat-label">Comparisons</div>
+                        <div class="stat-hint">Click to view</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Claims Section -->
+            <section class="collapsible-section">
+                <div id="claims-container" class="collapsible-content collapsed">
+                    <!-- Claims populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- LLM Results Section -->
+            <section class="collapsible-section">
+                <div id="llm-results-container" class="collapsible-content collapsed">
+                    <!-- LLM results populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Peer Results Section (if exists) -->
+            <section class="collapsible-section">
+                <div id="peer-results-container" class="collapsible-content collapsed">
+                    <!-- Peer results populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Comparison Section (if exists) -->
+            <section class="comparison-section" id="comparison-section" style="display:none;">
+                <h3>Results Concordance</h3>
+                <p class="section-description">Comparison between LLM and peer review results</p>
+                <div class="comparison-container">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>LLM Result</th>
+                                <th>Peer Result</th>
+                                <th>LLM Status</th>
+                                <th>Peer Status</th>
+                                <th>Agreement</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                            <!-- Comparison rows populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>OpenEvalProject - Transparent LLM-enabled peer review assessment</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js?v=16"></script>
+    <script src="/js/paper.js?v=16"></script>
+</body>
+</html>

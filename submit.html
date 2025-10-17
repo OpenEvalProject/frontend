@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Paper - OpenEvalProject</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>OpenEvalProject</h1>
+        <nav>
+            <a href="/index.html">← Back to Papers</a>
+            <span id="user-info"></span>
+            <button id="logout-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="submit-form">
+            <h2>Submit Paper for Analysis</h2>
+
+            <div id="auth-required" style="display:none;">
+                <p>You must be logged in to submit papers.</p>
+                <button id="login-btn">Login with ORCID</button>
+            </div>
+
+            <form id="submit-paper-form" style="display:none;">
+                <div class="form-group">
+                    <label for="manuscript-upload">Manuscript File (.txt or .pdf) <span class="required">*</span></label>
+                    <div class="file-drop-area" id="manuscript-drop-area">
+                        <p>Drag and drop manuscript here or click to browse</p>
+                        <input type="file" id="manuscript-upload" accept=".txt,.pdf" style="display:none;">
+                    </div>
+                    <div id="manuscript-info" style="display:none;">
+                        <p>Selected: <span id="manuscript-name"></span></p>
+                    </div>
+                    <small>Required. The paper title will be automatically extracted from the document.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviews-upload">Peer Reviews File (.txt or .pdf)</label>
+                    <div class="file-drop-area" id="reviews-drop-area">
+                        <p>Drag and drop peer reviews here or click to browse</p>
+                        <input type="file" id="reviews-upload" accept=".txt,.pdf" style="display:none;">
+                    </div>
+                    <div id="reviews-info" style="display:none;">
+                        <p>Selected: <span id="reviews-name"></span></p>
+                    </div>
+                    <small>Optional. Upload peer reviewer comments (without author responses).</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="responses-upload">Author Responses File (.txt or .pdf)</label>
+                    <div class="file-drop-area" id="responses-drop-area">
+                        <p>Drag and drop author responses here or click to browse</p>
+                        <input type="file" id="responses-upload" accept=".txt,.pdf" style="display:none;">
+                    </div>
+                    <div id="responses-info" style="display:none;">
+                        <p>Selected: <span id="responses-name"></span></p>
+                    </div>
+                    <small>Optional. Upload author responses to peer reviews.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submit-btn">Analyze Paper</button>
+                    <button type="button" id="cancel-btn">Cancel</button>
+                </div>
+
+                <div id="processing" style="display:none;">
+                    <p>Processing paper... This may take up to 60 seconds.</p>
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="error-message" class="error" style="display:none;"></div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>OpenEvalProject - Transparent LLM-enabled peer review assessment</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/submit.js"></script>
+</body>
+</html>
