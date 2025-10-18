@@ -117,9 +117,10 @@ function populateOverview(metadata) {
     $('#manuscript-title').text(metadata.title || metadata.id);
     $('#manuscript-id').text(metadata.id);
 
-    // Extract manuscript number from ID (e.g., "elife-00750" -> "00750")
+    // Extract manuscript number from ID (e.g., "elife-00731-v1" -> "00731")
     // and construct eLife URL
-    const manuscriptNumber = metadata.id.split('-').pop();
+    const parts = metadata.id.split('-');
+    const manuscriptNumber = parts[1]; // Get the middle part (00731)
     const elifeUrl = `https://elifesciences.org/articles/${manuscriptNumber}`;
     $('#manuscript-link').attr('href', elifeUrl);
 
