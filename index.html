@@ -47,6 +47,18 @@
             </table>
             <div id="loading">Loading manuscripts...</div>
             <div id="no-papers" style="display:none;">No manuscripts have been processed yet.</div>
+
+            <!-- Pagination Controls -->
+            <div id="pagination-controls" style="display:none;">
+                <div class="pagination-info">
+                    Showing <span id="showing-range">1-50</span> of <span id="total-count">0</span> manuscripts
+                </div>
+                <div class="pagination-buttons">
+                    <button id="prev-page" disabled>← Previous</button>
+                    <span id="page-info">Page <span id="current-page">1</span></span>
+                    <button id="next-page">Next →</button>
+                </div>
+            </div>
         </section>
     </main>
 

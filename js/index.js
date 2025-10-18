@@ -1,14 +1,36 @@
+// Pagination state
+let currentPage = 1;
+const itemsPerPage = 50;
+let totalCount = 0;
+
 $(document).ready(async function() {
     // Check authentication status
     await checkAuthStatus();
 
     // Load manuscripts table
-    await loadManuscripts();
+    await loadManuscripts(currentPage);
+
+    // Setup pagination button handlers
+    $('#prev-page').click(() => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadManuscripts(currentPage);
+        }
+    });
+
+    $('#next-page').click(() => {
+        const totalPages = Math.ceil(totalCount / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadManuscripts(currentPage);
+        }
+    });
 });
 
-async function loadManuscripts() {
+async function loadManuscripts(page = 1) {
     try {
-        const response = await fetch('/api/manuscripts', {
+        const offset = (page - 1) * itemsPerPage;
+        const response = await fetch(`/api/manuscripts?limit=${itemsPerPage}&offset=${offset}`, {
             credentials: 'include'
         });
 
@@ -21,11 +43,16 @@ async function loadManuscripts() {
         }
 
         const data = await response.json();
+        totalCount = data.total_count || 0;
 
         if (!data.manuscripts || data.manuscripts.length === 0) {
             $('#no-papers').show();
+            $('#pagination-controls').hide();
             return;
         }
+
+        // Clear existing table rows
+        $('#papers-list tbody').empty();
 
         // Populate table
         data.manuscripts.forEach(manuscript => {
@@ -69,11 +96,32 @@ async function loadManuscripts() {
             window.location.href = `/paper.html?id=${paperId}`;
         });
 
+        // Update pagination controls
+        updatePaginationControls(page, data.manuscripts.length);
+
     } catch (error) {
         $('#loading').hide();
         $('#no-papers').html('Error connecting to server. Please ensure the backend is running at <code>http://localhost:8000</code>').show();
         console.error('Error loading manuscripts:', error);
     }
+}
+
+function updatePaginationControls(page, itemsOnPage) {
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const startItem = (page - 1) * itemsPerPage + 1;
+    const endItem = (page - 1) * itemsPerPage + itemsOnPage;
+
+    // Show pagination controls
+    $('#pagination-controls').show();
+
+    // Update info text
+    $('#showing-range').text(`${startItem}-${endItem}`);
+    $('#total-count').text(totalCount);
+    $('#current-page').text(page);
+
+    // Update button states
+    $('#prev-page').prop('disabled', page === 1);
+    $('#next-page').prop('disabled', page >= totalPages);
 }
 
 function formatDate(dateString) {
