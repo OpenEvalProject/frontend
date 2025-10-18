@@ -131,6 +131,12 @@ function populateOverview(metadata) {
         $('#manuscript-abstract-container').show();
     }
 
+    // Display publication date if available
+    if (metadata.pub_date) {
+        $('#manuscript-pub-date').text(formatDate(metadata.pub_date));
+        $('#pub-date-container').show();
+    }
+
     $('#manuscript-date').text(formatDate(metadata.created_at));
 }
 

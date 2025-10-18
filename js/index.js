@@ -68,7 +68,7 @@ async function loadManuscripts() {
     // Prepare data for DataTables
     const tableData = data.manuscripts.map((manuscript) => {
       return [
-        formatDate(manuscript.created_at),
+        manuscript.pub_date ? formatDate(manuscript.pub_date) : "—",
         `<a href="/paper.html?id=${manuscript.id}">${
           manuscript.title || manuscript.id
         }</a>`,
@@ -97,7 +97,7 @@ async function loadManuscripts() {
     manuscriptsTable = $("#papers-list").DataTable({
       data: tableData,
       columns: [
-        { title: "Date Added", width: "10%" },
+        { title: "Publication Date", width: "10%" },
         { title: "Article Title", width: "35%" },
         { title: "Total Claims", width: "8%" },
         { title: "OpenEval Results", width: "8%" },
