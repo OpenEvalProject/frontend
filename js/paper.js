@@ -250,7 +250,6 @@ function populateResultsLLM(results) {
     const table = $('<table>').addClass('results-table');
     const thead = $('<thead>');
     const headerRow = $('<tr>');
-    headerRow.append($('<th>').text('Result ID'));
     headerRow.append($('<th>').text('Status'));
     headerRow.append($('<th>').text('# Claims'));
     headerRow.append($('<th>').text('Reasoning'));
@@ -264,9 +263,6 @@ function populateResultsLLM(results) {
 
     results.forEach((result, index) => {
         const row = $('<tr>').addClass('result-row').attr('data-result-index', index);
-
-        // Result ID
-        row.append($('<td>').text(`Result ${result.id}`));
 
         // Status badge
         row.append($('<td>').html(`<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`));
@@ -335,7 +331,7 @@ function populateResultsLLM(results) {
 
 function createResultDetailRow(result) {
     const detailRow = $('<tr>').addClass('result-detail-row');
-    const detailCell = $('<td>').attr('colspan', 4);
+    const detailCell = $('<td>').attr('colspan', 3);
 
     const detailContainer = $('<div>').addClass('result-detail-container');
 
@@ -365,7 +361,6 @@ function populateResultsPeer(results) {
     const table = $('<table>').addClass('results-table');
     const thead = $('<thead>');
     const headerRow = $('<tr>');
-    headerRow.append($('<th>').text('Result ID'));
     headerRow.append($('<th>').text('Status'));
     headerRow.append($('<th>').text('# Claims'));
     headerRow.append($('<th>').text('Reasoning'));
@@ -379,9 +374,6 @@ function populateResultsPeer(results) {
 
     results.forEach((result, index) => {
         const row = $('<tr>').addClass('result-row').attr('data-peer-result-index', index);
-
-        // Result ID
-        row.append($('<td>').text(`Result ${result.id}`));
 
         // Status badge
         row.append($('<td>').html(`<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`));
@@ -494,12 +486,6 @@ function populateComparisons(comparisons) {
     comparisons.forEach((comp, index) => {
         const row = $('<tr>').addClass('comparison-row').attr('data-comparison-index', index);
 
-        // LLM Result
-        row.append($('<td>').text(comp.llm_result_id || 'N/A'));
-
-        // Peer Result
-        row.append($('<td>').text(comp.peer_result_id || 'N/A'));
-
         // LLM Status
         row.append($('<td>').html(`<span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
 
@@ -567,7 +553,7 @@ function populateComparisons(comparisons) {
 
 function createComparisonDetailRow(comp) {
     const detailRow = $('<tr>').addClass('comparison-detail-row');
-    const detailCell = $('<td>').attr('colspan', 6);
+    const detailCell = $('<td>').attr('colspan', 4);
 
     const detailContainer = $('<div>').addClass('comparison-detail-container');
 
@@ -578,7 +564,6 @@ function createComparisonDetailRow(comp) {
     // Left side: LLM Result
     const llmSide = $('<div>').addClass('result-detail-side');
     llmSide.append($('<h4>').text('LLM Result'));
-    llmSide.append($('<div>').addClass('result-detail-field').html(`<strong>Result ID:</strong> ${comp.llm_result_id || 'N/A'}`));
     llmSide.append($('<div>').addClass('result-detail-field').html(`<strong>Status:</strong> <span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
 
     // Add reasoning first
@@ -594,7 +579,6 @@ function createComparisonDetailRow(comp) {
     // Right side: Peer Result
     const peerSide = $('<div>').addClass('result-detail-side');
     peerSide.append($('<h4>').text('Peer Result'));
-    peerSide.append($('<div>').addClass('result-detail-field').html(`<strong>Result ID:</strong> ${comp.peer_result_id || 'N/A'}`));
     peerSide.append($('<div>').addClass('result-detail-field').html(`<strong>Status:</strong> <span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`));
 
     // Add reasoning first
