@@ -45,7 +45,7 @@
                     </div>
                     <div class="stat-card clickable" data-target="llm-results-container">
                         <div class="stat-value" id="total-results-llm">0</div>
-                        <div class="stat-label">LLM Results</div>
+                        <div class="stat-label">OpenEval Results</div>
                         <div class="stat-hint">Click to view</div>
                     </div>
                     <div class="stat-card clickable" data-target="peer-results-container" id="peer-results-stat" style="display:none;">
@@ -68,7 +68,7 @@
                 </div>
             </section>
 
-            <!-- LLM Results Section -->
+            <!-- OpenEval Results Section -->
             <section class="collapsible-section">
                 <div id="llm-results-container" class="collapsible-content collapsed">
                     <!-- LLM results populated by JavaScript -->
@@ -85,12 +85,12 @@
             <!-- Comparison Section (if exists) -->
             <section class="comparison-section" id="comparison-section" style="display:none;">
                 <h3>Results Concordance</h3>
-                <p class="section-description">Comparison between LLM and peer review results</p>
+                <p class="section-description">Comparison between OpenEval and peer review results</p>
                 <div class="comparison-container">
                     <table class="comparison-table">
                         <thead>
                             <tr>
-                                <th>LLM Status</th>
+                                <th>OpenEval Status</th>
                                 <th>Peer Status</th>
                                 <th>Agreement</th>
                                 <th>Notes</th>

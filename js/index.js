@@ -1,134 +1,155 @@
-// Pagination state
-let currentPage = 1;
-const itemsPerPage = 50;
-let totalCount = 0;
+// DataTable instance
+let manuscriptsTable;
 
-$(document).ready(async function() {
-    // Check authentication status
-    await checkAuthStatus();
+$(document).ready(async function () {
+  // Check authentication status
+  await checkAuthStatus();
 
-    // Load manuscripts table
-    await loadManuscripts(currentPage);
+  // Load statistics
+  await loadStatistics();
 
-    // Setup pagination button handlers
-    $('#prev-page').click(() => {
-        if (currentPage > 1) {
-            currentPage--;
-            loadManuscripts(currentPage);
-        }
-    });
-
-    $('#next-page').click(() => {
-        const totalPages = Math.ceil(totalCount / itemsPerPage);
-        if (currentPage < totalPages) {
-            currentPage++;
-            loadManuscripts(currentPage);
-        }
-    });
+  // Load manuscripts table
+  await loadManuscripts();
 });
 
-async function loadManuscripts(page = 1) {
-    try {
-        const offset = (page - 1) * itemsPerPage;
-        const response = await fetch(`/api/manuscripts?limit=${itemsPerPage}&offset=${offset}`, {
-            credentials: 'include'
-        });
+async function loadStatistics() {
+  try {
+    const response = await fetch("/api/manuscripts/stats", {
+      credentials: "include",
+    });
 
-        $('#loading').hide();
-
-        if (!response.ok) {
-            console.error('API error:', response.status, response.statusText);
-            $('#no-papers').text('Unable to load manuscripts. Please check that the backend server is running.').show();
-            return;
-        }
-
-        const data = await response.json();
-        totalCount = data.total_count || 0;
-
-        if (!data.manuscripts || data.manuscripts.length === 0) {
-            $('#no-papers').show();
-            $('#pagination-controls').hide();
-            return;
-        }
-
-        // Clear existing table rows
-        $('#papers-list tbody').empty();
-
-        // Populate table
-        data.manuscripts.forEach(manuscript => {
-            const row = $('<tr>').addClass('paper-row').attr('data-paper-id', manuscript.id);
-
-            // Date Added
-            row.append($('<td>').text(formatDate(manuscript.created_at)));
-
-            // Article Title (clickable)
-            row.append($('<td>').html(`<a href="/paper.html?id=${manuscript.id}">${manuscript.title || manuscript.id}</a>`));
-
-            // Total Claims
-            row.append($('<td>').text(manuscript.total_claims));
-
-            // LLM Results
-            row.append($('<td>').text(manuscript.total_results_llm));
-
-            // Peer Results
-            row.append($('<td>').text(manuscript.total_results_peer || '—'));
-
-            // Comparisons
-            row.append($('<td>').text(manuscript.total_comparisons));
-
-            // Agree count (empty if no peer reviews)
-            if (manuscript.has_peer_reviews) {
-                row.append($('<td>').html(`<span class="agree-badge">${manuscript.agree_count || 0}</span>`));
-                row.append($('<td>').html(`<span class="partial-badge">${manuscript.partial_count || 0}</span>`));
-                row.append($('<td>').html(`<span class="disagree-badge">${manuscript.disagree_count || 0}</span>`));
-            } else {
-                row.append($('<td>').html('<span class="na-badge">—</span>'));
-                row.append($('<td>').html('<span class="na-badge">—</span>'));
-                row.append($('<td>').html('<span class="na-badge">—</span>'));
-            }
-
-            $('#papers-list tbody').append(row);
-        });
-
-        // Make rows clickable
-        $('.paper-row').click(function() {
-            const paperId = $(this).data('paper-id');
-            window.location.href = `/paper.html?id=${paperId}`;
-        });
-
-        // Update pagination controls
-        updatePaginationControls(page, data.manuscripts.length);
-
-    } catch (error) {
-        $('#loading').hide();
-        $('#no-papers').html('Error connecting to server. Please ensure the backend is running at <code>http://localhost:8000</code>').show();
-        console.error('Error loading manuscripts:', error);
+    if (!response.ok) {
+      console.error("Failed to load statistics:", response.status);
+      return;
     }
+
+    const stats = await response.json();
+
+    // Update the statistics display
+    $("#stat-manuscripts").text(stats.total_manuscripts.toLocaleString());
+    $("#stat-claims").text(stats.total_claims.toLocaleString());
+    $("#stat-llm-results").text(stats.total_llm_results.toLocaleString());
+    $("#stat-peer-results").text(stats.total_peer_results.toLocaleString());
+    $("#stat-comparisons").text(stats.total_comparisons.toLocaleString());
+  } catch (error) {
+    console.error("Error loading statistics:", error);
+  }
 }
 
-function updatePaginationControls(page, itemsOnPage) {
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-    const startItem = (page - 1) * itemsPerPage + 1;
-    const endItem = (page - 1) * itemsPerPage + itemsOnPage;
+async function loadManuscripts() {
+  try {
+    // Fetch all manuscripts (no pagination, DataTables will handle it)
+    const response = await fetch("/api/manuscripts?limit=10000", {
+      credentials: "include",
+    });
 
-    // Show pagination controls
-    $('#pagination-controls').show();
+    $("#loading").hide();
 
-    // Update info text
-    $('#showing-range').text(`${startItem}-${endItem}`);
-    $('#total-count').text(totalCount);
-    $('#current-page').text(page);
+    if (!response.ok) {
+      console.error("API error:", response.status, response.statusText);
+      $("#no-papers")
+        .text(
+          "Unable to load manuscripts. Please check that the backend server is running."
+        )
+        .show();
+      return;
+    }
 
-    // Update button states
-    $('#prev-page').prop('disabled', page === 1);
-    $('#next-page').prop('disabled', page >= totalPages);
+    const data = await response.json();
+
+    if (!data.manuscripts || data.manuscripts.length === 0) {
+      $("#no-papers").show();
+      return;
+    }
+
+    // Hide custom pagination controls (DataTables will provide its own)
+    $("#pagination-controls").hide();
+
+    // Prepare data for DataTables
+    const tableData = data.manuscripts.map((manuscript) => {
+      return [
+        formatDate(manuscript.created_at),
+        `<a href="/paper.html?id=${manuscript.id}">${
+          manuscript.title || manuscript.id
+        }</a>`,
+        manuscript.total_claims,
+        manuscript.total_results_llm,
+        manuscript.total_results_peer || "—",
+        manuscript.total_comparisons,
+        manuscript.has_peer_reviews
+          ? `<span class="agree-badge">${manuscript.agree_count || 0}</span>`
+          : '<span class="na-badge">—</span>',
+        manuscript.has_peer_reviews
+          ? `<span class="disjoint-badge">${
+              manuscript.disjoint_count || 0
+            }</span>`
+          : '<span class="na-badge">—</span>',
+        manuscript.has_peer_reviews
+          ? `<span class="disagree-badge">${
+              manuscript.disagree_count || 0
+            }</span>`
+          : '<span class="na-badge">—</span>',
+        manuscript.id, // Hidden column for row click handling
+      ];
+    });
+
+    // Initialize DataTables
+    manuscriptsTable = $("#papers-list").DataTable({
+      data: tableData,
+      columns: [
+        { title: "Date Added", width: "10%" },
+        { title: "Article Title", width: "35%" },
+        { title: "Total Claims", width: "8%" },
+        { title: "OpenEval Results", width: "8%" },
+        { title: "Peer Results", width: "8%" },
+        { title: "Comparisons", width: "8%" },
+        { title: "Agree", width: "7%" },
+        { title: "Disjoint", width: "7%" },
+        { title: "Disagree", width: "7%" },
+        { title: "ID", visible: false, searchable: false }, // Hidden ID column
+      ],
+      pageLength: 10,
+      lengthMenu: [10, 25, 50, 100],
+      order: [[0, "desc"]], // Sort by date descending by default
+      responsive: true,
+      language: {
+        search: "Search manuscripts:",
+        lengthMenu: "Show _MENU_ manuscripts per page",
+        info: "Showing _START_ to _END_ of _TOTAL_ manuscripts",
+        infoEmpty: "No manuscripts available",
+        infoFiltered: "(filtered from _MAX_ total manuscripts)",
+        zeroRecords: "No matching manuscripts found",
+      },
+      drawCallback: function () {
+        // Make rows clickable after each redraw
+        $("#papers-list tbody tr")
+          .css("cursor", "pointer")
+          .off("click")
+          .on("click", function () {
+            const rowData = manuscriptsTable.row(this).data();
+            if (rowData && rowData[9]) {
+              // rowData[9] is the hidden ID column
+              window.location.href = `/paper.html?id=${rowData[9]}`;
+            }
+          });
+      },
+    });
+  } catch (error) {
+    $("#loading").hide();
+    $("#no-papers")
+      .html(
+        "Error connecting to server. Please ensure the backend is running at <code>http://localhost:8000</code>"
+      )
+      .show();
+    console.error("Error loading manuscripts:", error);
+  }
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }

@@ -1,76 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OpenEvalProject - Transparent LLM-Enabled Peer Review</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  </head>
+  <body>
     <header>
-        <h1>OpenEvalProject</h1>
-        <nav>
-            <a href="/search.html">
-                <button>Search Claims</button>
-            </a>
-            <span id="user-info"><!-- Populated by JS --></span>
-            <button id="login-btn">Login with ORCID</button>
-            <button id="logout-btn" style="display:none;">Logout</button>
-            <a href="/submit.html" id="submit-link" style="display:none;">
-                <button>Submit New Paper</button>
-            </a>
-        </nav>
+      <h1>OpenEvalProject</h1>
+      <nav>
+        <a href="/search.html">
+          <button>Search Claims</button>
+        </a>
+        <span id="user-info"><!-- Populated by JS --></span>
+        <button id="login-btn">Login with ORCID</button>
+        <button id="logout-btn" style="display: none">Logout</button>
+        <a href="/submit.html" id="submit-link" style="display: none">
+          <button>Submit New Paper</button>
+        </a>
+      </nav>
     </header>
 
     <main>
-        <section class="intro">
-            <p>The OpenEvalProject provides transparent, systematic evaluation of large language model (LLM) performance in scientific peer review. We compare LLM-generated reviews against traditional peer reviews to assess their accuracy, consistency, and reliability in identifying claims and evaluating scientific evidence.</p>
-            <p>Explore our dataset of manuscripts below. Click any paper to view detailed claim-by-claim comparisons between LLM and peer reviewer assessments.</p>
-        </section>
+      <section class="intro">
+        <h2>The OpenEvalProject</h2>
+        <p>
+          The OpenEvalProject provides transparent, systematic evaluation of
+          large language model (LLM) performance in scientific peer review. We
+          compare LLM-generated reviews against traditional peer reviews to
+          assess their accuracy, consistency, and reliability in identifying
+          claims and evaluating scientific evidence. Explore our dataset of
+          manuscripts below. Click any paper to view detailed claim-by-claim
+          comparisons between LLM and peer reviewer assessments.
+        </p>
 
-        <section class="papers-table">
-            <h2>Processed Manuscripts</h2>
-            <table id="papers-list">
-                <thead>
-                    <tr>
-                        <th>Date Added</th>
-                        <th>Article Title</th>
-                        <th>Total Claims</th>
-                        <th>LLM Results</th>
-                        <th>Peer Results</th>
-                        <th>Comparisons</th>
-                        <th>Agree</th>
-                        <th>Disjoint</th>
-                        <th>Disagree</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
-            <div id="loading">Loading manuscripts...</div>
-            <div id="no-papers" style="display:none;">No manuscripts have been processed yet.</div>
+        <!-- Summary Statistics -->
+        <div class="summary-stats-home">
+          <div class="stat-box">
+            <div class="stat-value" id="stat-manuscripts">-</div>
+            <div class="stat-label">Papers Evaluated</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-claims">-</div>
+            <div class="stat-label">Claims Extracted</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-llm-results">-</div>
+            <div class="stat-label">AI Reviews</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-peer-results">-</div>
+            <div class="stat-label">Peer Reviews</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-comparisons">-</div>
+            <div class="stat-label">Comparisons Made</div>
+          </div>
+        </div>
+      </section>
 
-            <!-- Pagination Controls -->
-            <div id="pagination-controls" style="display:none;">
-                <div class="pagination-info">
-                    Showing <span id="showing-range">1-50</span> of <span id="total-count">0</span> manuscripts
-                </div>
-                <div class="pagination-buttons">
-                    <button id="prev-page" disabled>← Previous</button>
-                    <span id="page-info">Page <span id="current-page">1</span></span>
-                    <button id="next-page">Next →</button>
-                </div>
-            </div>
-        </section>
+      <section class="papers-table">
+        <h2>Processed Manuscripts</h2>
+        <table id="papers-list">
+          <thead>
+            <tr>
+              <th>Date Added</th>
+              <th>Article Title</th>
+              <th>Total Claims</th>
+              <th>OpenEval Results</th>
+              <th>Peer Results</th>
+              <th>Comparisons</th>
+              <th>Agree</th>
+              <th>Disjoint</th>
+              <th>Disagree</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated by JavaScript -->
+          </tbody>
+        </table>
+        <div id="loading">Loading manuscripts...</div>
+        <div id="no-papers" style="display: none">
+          No manuscripts have been processed yet.
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="pagination-controls" style="display: none">
+          <div class="pagination-info">
+            Showing <span id="showing-range">1-50</span> of
+            <span id="total-count">0</span> manuscripts
+          </div>
+          <div class="pagination-buttons">
+            <button id="prev-page" disabled>← Previous</button>
+            <span id="page-info">Page <span id="current-page">1</span></span>
+            <button id="next-page">Next →</button>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-        <p>OpenEvalProject - Transparent LLM-enabled peer review assessment</p>
+      <p>OpenEvalProject - Transparent LLM-enabled peer review assessment</p>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="/js/common.js?v=2"></script>
     <script src="/js/index.js?v=2"></script>
-</body>
+  </body>
 </html>

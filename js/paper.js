@@ -486,7 +486,7 @@ function populateComparisons(comparisons) {
     comparisons.forEach((comp, index) => {
         const row = $('<tr>').addClass('comparison-row').attr('data-comparison-index', index);
 
-        // LLM Status
+        // OpenEval Status
         row.append($('<td>').html(`<span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
 
         // Peer Status
@@ -561,9 +561,9 @@ function createComparisonDetailRow(comp) {
     const llmResult = window.manuscriptData.results_llm.find(r => r.id === comp.llm_result_id);
     const peerResult = window.manuscriptData.results_peer.find(r => r.id === comp.peer_result_id);
 
-    // Left side: LLM Result
+    // Left side: OpenEval Result
     const llmSide = $('<div>').addClass('result-detail-side');
-    llmSide.append($('<h4>').text('LLM Result'));
+    llmSide.append($('<h4>').text('OpenEval Result'));
     llmSide.append($('<div>').addClass('result-detail-field').html(`<strong>Status:</strong> <span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
 
     // Add reasoning first
