@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Analysis</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* V2 specific styles */
+        .paper-claims-section {
+            margin-bottom: 2rem;
+        }
+
+        .paper-claim-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .paper-claim-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .paper-claim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .paper-claim-id {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .paper-claim-text {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .llm-evaluation {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .evaluation-row {
+            margin-bottom: 0.5rem;
+        }
+
+        .evaluation-label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 0.5rem;
+        }
+
+        .review-claims-section {
+            margin-bottom: 2rem;
+        }
+
+        .review-claim-card {
+            background: white;
+            border: 2px solid #e3f2fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .review-claim-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-claim-id {
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .review-claim-references {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #fff3e0;
+            border-radius: 4px;
+        }
+
+        .concordance-section {
+            margin-bottom: 2rem;
+        }
+
+        .concordance-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .concordance-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .concordance-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .concordance-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .concordance-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .agreement-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .agreement-badge.agree {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .agreement-badge.disagree {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .agreement-badge.na {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .addressed-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .addressed-yes {
+            background: #28a745;
+            color: white;
+        }
+
+        .addressed-no {
+            background: #dc3545;
+            color: white;
+        }
+
+        .concordance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .concordance-metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .concordance-metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .concordance-metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .claim-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .badge-supported {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-unsupported {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-uncertain {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Scientific Claim Verification</h1>
+        <nav>
+            <a href="/index.html">← Back to Papers</a>
+            <span id="user-info"></span>
+            <button id="login-btn">Login with ORCID</button>
+            <button id="logout-btn" style="display:none;">Logout</button>
+            <a href="/submit.html" id="submit-link" style="display:none;">
+                <button>Submit New Paper</button>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading">Loading paper analysis...</div>
+        <div id="error" style="display:none;"></div>
+
+        <section id="paper-details" style="display:none;">
+            <h2 id="paper-title"></h2>
+
+            <div class="paper-metadata">
+                <p><strong>Source:</strong> <span id="paper-source"></span></p>
+                <p><strong>Submitted by:</strong> <span id="paper-submitter"></span></p>
+                <p><strong>Processed:</strong> <span id="paper-date"></span></p>
+                <p><strong>Document length:</strong> <span id="paper-length"></span> characters</p>
+            </div>
+
+            <section class="scorecard">
+                <h3>Analysis Summary</h3>
+                <div class="score-display">
+                    <div class="score-main">
+                        <span class="score-value" id="verification-score"></span>
+                        <span class="score-label">Agreement Rate</span>
+                    </div>
+                    <div class="score-breakdown">
+                        <div class="stat">
+                            <span class="stat-value supported" id="supported-count"></span>
+                            <span class="stat-label">Supported</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value unsupported" id="unsupported-count"></span>
+                            <span class="stat-label">Unsupported</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value uncertain" id="uncertain-count"></span>
+                            <span class="stat-label">Uncertain</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="total-count"></span>
+                            <span class="stat-label">Total Claims</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Claims Section -->
+            <section class="paper-claims-section">
+                <h3>Extracted Claims</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Atomic factual claims extracted from the manuscript
+                </p>
+                <div id="claims-container">
+                    <!-- Claims populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- LLM Results Section -->
+            <section class="review-claims-section">
+                <h3>LLM Results</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    LLM grouped claims into results with evaluations
+                </p>
+                <div id="llm-results-container">
+                    <!-- LLM results populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Peer Review Results Section -->
+            <section class="review-claims-section">
+                <h3>Peer Review Results</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Peer reviewers grouped claims into results with evaluations
+                </p>
+                <div id="peer-results-container">
+                    <!-- Peer review results populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Results Concordance Section -->
+            <section class="concordance-section">
+                <h3>Results Concordance</h3>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    Comparison between LLM and peer review results
+                </p>
+
+                <div class="concordance-metrics" id="concordance-metrics">
+                    <!-- Metrics populated by JavaScript -->
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="concordance-table">
+                        <thead>
+                            <tr>
+                                <th>LLM Claims</th>
+                                <th>Peer Claims</th>
+                                <th>LLM Status</th>
+                                <th>Peer Status</th>
+                                <th>Agreement</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="concordance-table-body">
+                            <!-- Concordance rows populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>Powered by LLM-based claim verification</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/paper.js"></script>
+</body>
+</html>
