@@ -116,6 +116,13 @@ async function loadManuscript(manuscriptId) {
 function populateOverview(metadata) {
     $('#manuscript-title').text(metadata.title || metadata.id);
     $('#manuscript-id').text(metadata.id);
+
+    // Extract manuscript number from ID (e.g., "elife-00750" -> "00750")
+    // and construct eLife URL
+    const manuscriptNumber = metadata.id.split('-').pop();
+    const elifeUrl = `https://elifesciences.org/articles/${manuscriptNumber}`;
+    $('#manuscript-link').attr('href', elifeUrl);
+
     $('#manuscript-doi').text(metadata.doi || 'N/A');
     $('#manuscript-date').text(formatDate(metadata.created_at));
 }
