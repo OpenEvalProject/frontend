@@ -117,14 +117,20 @@ function populateOverview(metadata) {
     $('#manuscript-title').text(metadata.title || metadata.id);
     $('#manuscript-id').text(metadata.id);
 
-    // Extract manuscript number from ID (e.g., "elife-00731-v1" -> "00731")
-    // and construct eLife URL
-    const parts = metadata.id.split('-');
-    const manuscriptNumber = parts[1]; // Get the middle part (00731)
-    const elifeUrl = `https://elifesciences.org/articles/${manuscriptNumber}`;
-    $('#manuscript-link').attr('href', elifeUrl);
+    // Set DOI as clickable link
+    if (metadata.doi) {
+        const doiUrl = `https://doi.org/${metadata.doi}`;
+        $('#manuscript-doi').attr('href', doiUrl).text(metadata.doi);
+    } else {
+        $('#manuscript-doi').attr('href', '#').text('N/A').css('pointer-events', 'none');
+    }
 
-    $('#manuscript-doi').text(metadata.doi || 'N/A');
+    // Display abstract if available
+    if (metadata.abstract) {
+        $('#manuscript-abstract').text(metadata.abstract);
+        $('#manuscript-abstract-container').show();
+    }
+
     $('#manuscript-date').text(formatDate(metadata.created_at));
 }
 
