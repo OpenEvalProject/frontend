@@ -138,6 +138,28 @@ function createResultCard(result, rank) {
     if (similarity >= 0.8) badgeClass = 'similarity-high';
     else if (similarity >= 0.6) badgeClass = 'similarity-medium';
 
+    // Parse evidence_type if it's a string (double-encoded JSON)
+    let evidenceTypes = [];
+    if (typeof evidence_type === 'string') {
+        try {
+            const parsed = JSON.parse(evidence_type);
+            if (typeof parsed === 'string') {
+                evidenceTypes = JSON.parse(parsed);
+            } else {
+                evidenceTypes = parsed;
+            }
+        } catch (e) {
+            evidenceTypes = [evidence_type];
+        }
+    } else if (Array.isArray(evidence_type)) {
+        evidenceTypes = evidence_type;
+    }
+
+    // Create evidence type badges HTML
+    const evidenceBadgesHtml = evidenceTypes.map(type =>
+        `<span class="evidence-type-badge">${escapeHtml(type)}</span>`
+    ).join(' ');
+
     return $(`
         <div class="result-card">
             <div class="result-header">
@@ -152,7 +174,7 @@ function createResultCard(result, rank) {
                     <h3 class="claim-text">${escapeHtml(claim)}</h3>
                     <div class="claim-metadata">
                         <span class="claim-type-badge">${escapeHtml(claim_type)}</span>
-                        <span class="evidence-type-badge">${escapeHtml(evidence_type)}</span>
+                        ${evidenceBadgesHtml}
                     </div>
                 </div>
 
