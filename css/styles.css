@@ -2250,3 +2250,34 @@ table.dataTable thead th.sorting_desc {
         padding: 0.4rem 0.8rem;
     }
 }
+
+/* Disable DataTables column hover highlighting */
+table.dataTable tbody tr:hover td,
+table.dataTable tbody tr:hover th {
+    background-color: inherit !important;
+}
+
+table.dataTable.hover tbody tr:hover,
+table.dataTable.display tbody tr:hover {
+    background-color: inherit !important;
+}
+
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
+    background-color: #f9f9f9;
+}
+
+table.dataTable.stripe tbody tr.even,
+table.dataTable.display tbody tr.even {
+    background-color: white;
+}
+
+table.dataTable.stripe tbody tr.odd:hover,
+table.dataTable.display tbody tr.odd:hover {
+    background-color: #f9f9f9 !important;
+}
+
+table.dataTable.stripe tbody tr.even:hover,
+table.dataTable.display tbody tr.even:hover {
+    background-color: white !important;
+}
