@@ -81,7 +81,8 @@ async function loadManuscript(manuscriptId) {
         window.manuscriptData = {
             claims: data.claims,
             results_llm: data.results_llm,
-            results_peer: data.results_peer
+            results_peer: data.results_peer,
+            comparisons: data.comparisons || []
         };
 
         // Populate manuscript overview
@@ -226,7 +227,7 @@ function populateClaims(claims) {
 
             // Open this row
             const rowIndex = claimsTable.row(this).index();
-            const claim = claims[rowIndex];
+            const claim = window.manuscriptData.claims[rowIndex];
             row.child(formatClaimDetails(claim)).show();
             $(this).addClass('expanded');
         }
@@ -319,7 +320,7 @@ function populateResultsLLM(results) {
 
             // Open this row
             const rowIndex = llmResultsTable.row(this).index();
-            const result = results[rowIndex];
+            const result = window.manuscriptData.results_llm[rowIndex];
             row.child(formatResultDetails(result)).show();
             $(this).addClass('expanded');
         }
@@ -419,7 +420,7 @@ function populateResultsPeer(results) {
 
             // Open this row
             const rowIndex = peerResultsTable.row(this).index();
-            const result = results[rowIndex];
+            const result = window.manuscriptData.results_peer[rowIndex];
             row.child(formatResultDetails(result)).show();
             $(this).addClass('expanded');
         }
@@ -485,7 +486,7 @@ function populateComparisons(comparisons) {
 
             // Open this row
             const rowIndex = comparisonsTable.row(this).index();
-            const comp = comparisons[rowIndex];
+            const comp = window.manuscriptData.comparisons[rowIndex];
             row.child(formatComparisonDetails(comp)).show();
             $(this).addClass('expanded');
         }
