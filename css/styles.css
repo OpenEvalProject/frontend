@@ -2101,6 +2101,13 @@ footer {
     line-height: 1.3;
 }
 
+.stat-sublabel {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 0.25rem;
+    opacity: 0.85;
+}
+
 /* DataTables styling overrides */
 .dataTables_wrapper {
     padding: 1rem 0;

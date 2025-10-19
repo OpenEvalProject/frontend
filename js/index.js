@@ -30,6 +30,7 @@ async function loadStatistics() {
     $("#stat-claims").text(stats.total_claims.toLocaleString());
     $("#stat-llm-results").text(stats.total_llm_results.toLocaleString());
     $("#stat-peer-results").text(stats.total_peer_results.toLocaleString());
+    $("#stat-peer-papers").text(`(${stats.manuscripts_with_peer_reviews} papers)`);
     $("#stat-comparisons").text(stats.total_comparisons.toLocaleString());
   } catch (error) {
     console.error("Error loading statistics:", error);
