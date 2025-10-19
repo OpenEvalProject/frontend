@@ -52,6 +52,12 @@ $(document).ready(async function() {
     });
 });
 
+// Global DataTable instances
+let claimsTable;
+let llmResultsTable;
+let peerResultsTable;
+let comparisonsTable;
+
 async function loadManuscript(manuscriptId) {
     try {
         const response = await fetch(`/api/manuscripts/${manuscriptId}`, {
@@ -156,105 +162,104 @@ function populateClaims(claims) {
     }
 
     // Create table structure
-    const table = $('<table>').addClass('claims-list-table');
-    const thead = $('<thead>');
-    const headerRow = $('<tr>');
-    headerRow.append($('<th>').text('Claim ID'));
-    headerRow.append($('<th>').text('Type'));
-    headerRow.append($('<th>').text('Claim'));
-    headerRow.append($('<th>').text('Evidence Type'));
-    thead.append(headerRow);
-    table.append(thead);
+    container.html('<table id="claims-table" class="display claims-list-table" style="width:100%"></table>');
 
-    const tbody = $('<tbody>');
-
-    // Store claims data globally for access in click handler
-    window.claimsListData = claims;
-
-    claims.forEach((claim, index) => {
-        const row = $('<tr>').addClass('claim-list-row').attr('data-claim-index', index);
-
-        // Claim ID
+    // Prepare data for DataTables
+    const tableData = claims.map(claim => {
         const displayId = claim.claim_id || claim.id;
-        row.append($('<td>').text(displayId));
+        const typeBadge = `<span class="claim-type-badge">${claim.claim_type}</span>`;
 
-        // Claim Type
-        row.append($('<td>').html(`<span class="claim-type-badge">${claim.claim_type}</span>`));
-
-        // Claim text (truncated if long)
-        const claimCell = $('<td>').addClass('claim-text-cell');
+        // Truncate claim text
         const maxLength = 200;
-        if (claim.claim.length > maxLength) {
-            claimCell.text(claim.claim.substring(0, maxLength) + '...');
-        } else {
-            claimCell.text(claim.claim);
-        }
-        row.append(claimCell);
+        const claimText = claim.claim.length > maxLength
+            ? claim.claim.substring(0, maxLength) + '...'
+            : claim.claim;
 
-        // Evidence type
-        const evidenceCell = $('<td>').addClass('evidence-type-cell');
+        // Evidence type badges
+        let evidenceBadges = '—';
         if (claim.evidence_type && claim.evidence_type.length > 0) {
-            claim.evidence_type.forEach(type => {
-                evidenceCell.append($('<span>').addClass('evidence-type-tag').text(type));
-            });
-        } else {
-            evidenceCell.text('—');
+            evidenceBadges = claim.evidence_type.map(type =>
+                `<span class="evidence-type-tag">${type}</span>`
+            ).join(' ');
         }
-        row.append(evidenceCell);
 
-        tbody.append(row);
+        return [displayId, typeBadge, claimText, evidenceBadges];
     });
 
-    table.append(tbody);
-    container.append(table);
+    // Initialize DataTable
+    claimsTable = $('#claims-table').DataTable({
+        data: tableData,
+        columns: [
+            { title: 'Claim ID', width: '10%' },
+            { title: 'Type', width: '15%' },
+            { title: 'Claim', width: '55%' },
+            { title: 'Evidence Type', width: '20%' }
+        ],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        order: [[0, 'asc']],
+        language: {
+            search: 'Search claims:',
+            lengthMenu: 'Show _MENU_ claims',
+            info: 'Showing _START_ to _END_ of _TOTAL_ claims',
+            infoEmpty: 'No claims available',
+            infoFiltered: '(filtered from _MAX_ total claims)'
+        }
+    });
 
-    // Add click handler for expandable rows
-    $('.claim-list-row').click(function() {
-        const index = $(this).data('claim-index');
-        const nextRow = $(this).next();
+    // Add click handler for expandable rows using DataTables child rows API
+    $('#claims-table tbody').on('click', 'tr', function() {
+        const row = claimsTable.row(this);
 
-        // Check if next row is already an expanded detail row
-        if (nextRow.hasClass('claim-detail-row')) {
-            // Collapse: remove the detail row
-            nextRow.remove();
+        if (row.child.isShown()) {
+            // Close this row
+            row.child.hide();
             $(this).removeClass('expanded');
         } else {
-            // Expand: insert detail row
-            // First, collapse any other expanded rows
-            $('.claim-detail-row').remove();
-            $('.claim-list-row').removeClass('expanded');
+            // Close all other rows
+            claimsTable.rows().every(function() {
+                if (this.child.isShown()) {
+                    this.child.hide();
+                    $(this.node()).removeClass('expanded');
+                }
+            });
 
-            const claim = window.claimsListData[index];
-            const detailRow = createClaimDetailRow(claim);
-            $(this).after(detailRow);
+            // Open this row
+            const rowIndex = claimsTable.row(this).index();
+            const claim = claims[rowIndex];
+            row.child(formatClaimDetails(claim)).show();
             $(this).addClass('expanded');
         }
     });
 }
 
-function createClaimDetailRow(claim) {
-    const detailRow = $('<tr>').addClass('claim-detail-row');
-    const detailCell = $('<td>').attr('colspan', 4);
-
-    const detailContainer = $('<div>').addClass('claim-detail-container');
+function formatClaimDetails(claim) {
+    let html = '<div class="claim-detail-container">';
 
     // Full claim text
-    detailContainer.append($('<div>').addClass('claim-detail-field').html(`<strong>Full Claim:</strong><div class="claim-full-text">${claim.claim}</div>`));
+    html += '<div class="claim-detail-field">';
+    html += '<strong>Full Claim:</strong>';
+    html += `<div class="claim-full-text">${claim.claim}</div>`;
+    html += '</div>';
 
     // Source text
     if (claim.source_text) {
-        detailContainer.append($('<div>').addClass('claim-detail-field').html(`<strong>Source Text:</strong><div class="source-text-box">${claim.source_text}</div>`));
+        html += '<div class="claim-detail-field">';
+        html += '<strong>Source Text:</strong>';
+        html += `<div class="source-text-box">${claim.source_text}</div>`;
+        html += '</div>';
     }
 
     // Evidence reasoning
     if (claim.evidence_reasoning) {
-        detailContainer.append($('<div>').addClass('claim-detail-field').html(`<strong>Evidence Reasoning:</strong><div class="reasoning-box">${claim.evidence_reasoning}</div>`));
+        html += '<div class="claim-detail-field">';
+        html += '<strong>Evidence Reasoning:</strong>';
+        html += `<div class="reasoning-box">${claim.evidence_reasoning}</div>`;
+        html += '</div>';
     }
 
-    detailCell.append(detailContainer);
-    detailRow.append(detailCell);
-
-    return detailRow;
+    html += '</div>';
+    return html;
 }
 
 function populateResultsLLM(results) {
@@ -267,106 +272,95 @@ function populateResultsLLM(results) {
     }
 
     // Create table structure
-    const table = $('<table>').addClass('results-table');
-    const thead = $('<thead>');
-    const headerRow = $('<tr>');
-    headerRow.append($('<th>').text('Status'));
-    headerRow.append($('<th>').text('# Claims'));
-    headerRow.append($('<th>').text('Reasoning'));
-    thead.append(headerRow);
-    table.append(thead);
+    container.html('<table id="llm-results-table" class="display results-table" style="width:100%"></table>');
 
-    const tbody = $('<tbody>');
+    // Prepare data for DataTables
+    const tableData = results.map(result => {
+        const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
+        const claimCount = result.claim_ids ? result.claim_ids.length : 0;
+        const reasoning = result.result_reasoning || '—';
 
-    // Store results data globally for access in click handler
-    window.llmResultsData = results;
-
-    results.forEach((result, index) => {
-        const row = $('<tr>').addClass('result-row').attr('data-result-index', index);
-
-        // Status badge
-        row.append($('<td>').html(`<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`));
-
-        // Number of claims
-        row.append($('<td>').text(result.claim_ids ? result.claim_ids.length : 0));
-
-        // Reasoning (with expand button if long)
-        const reasoningCell = $('<td>').addClass('reasoning-cell');
-        if (result.result_reasoning) {
-            const maxLength = 150;
-            if (result.result_reasoning.length > maxLength) {
-                const shortReasoning = result.result_reasoning.substring(0, maxLength) + '...';
-                const reasoningSpan = $('<span>').text(shortReasoning);
-                const expandBtn = $('<button>').addClass('expand-button').text('Expand');
-
-                expandBtn.click(function(e) {
-                    e.stopPropagation(); // Prevent row click
-                    if (reasoningSpan.text().endsWith('...')) {
-                        reasoningSpan.text(result.result_reasoning);
-                        $(this).text('Collapse');
-                    } else {
-                        reasoningSpan.text(shortReasoning);
-                        $(this).text('Expand');
-                    }
-                });
-
-                reasoningCell.append(reasoningSpan).append(' ').append(expandBtn);
-            } else {
-                reasoningCell.text(result.result_reasoning);
-            }
-        } else {
-            reasoningCell.text('—');
-        }
-        row.append(reasoningCell);
-
-        tbody.append(row);
+        return [statusBadge, claimCount, reasoning];
     });
 
-    table.append(tbody);
-    container.append(table);
+    // Initialize DataTable
+    llmResultsTable = $('#llm-results-table').DataTable({
+        data: tableData,
+        columns: [
+            { title: 'Status', width: '20%' },
+            { title: '# Claims', width: '15%' },
+            { title: 'Reasoning', width: '65%' }
+        ],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        order: [[0, 'asc']],
+        language: {
+            search: 'Search results:',
+            lengthMenu: 'Show _MENU_ results',
+            info: 'Showing _START_ to _END_ of _TOTAL_ results'
+        }
+    });
 
     // Add click handler for expandable rows
-    $('.result-row').click(function() {
-        const index = $(this).data('result-index');
-        const nextRow = $(this).next();
+    $('#llm-results-table tbody').on('click', 'tr', function() {
+        const row = llmResultsTable.row(this);
 
-        // Check if next row is already an expanded detail row
-        if (nextRow.hasClass('result-detail-row')) {
-            // Collapse: remove the detail row
-            nextRow.remove();
+        if (row.child.isShown()) {
+            row.child.hide();
             $(this).removeClass('expanded');
         } else {
-            // Expand: insert detail row
-            // First, collapse any other expanded rows
-            $('.result-detail-row').remove();
-            $('.result-row').removeClass('expanded');
+            // Close all other rows
+            llmResultsTable.rows().every(function() {
+                if (this.child.isShown()) {
+                    this.child.hide();
+                    $(this.node()).removeClass('expanded');
+                }
+            });
 
-            const result = window.llmResultsData[index];
-            const detailRow = createResultDetailRow(result);
-            $(this).after(detailRow);
+            // Open this row
+            const rowIndex = llmResultsTable.row(this).index();
+            const result = results[rowIndex];
+            row.child(formatResultDetails(result)).show();
             $(this).addClass('expanded');
         }
     });
 }
 
-function createResultDetailRow(result) {
-    const detailRow = $('<tr>').addClass('result-detail-row');
-    const detailCell = $('<td>').attr('colspan', 3);
+function formatResultDetails(result) {
+    let html = '<div class="result-detail-container">';
 
-    const detailContainer = $('<div>').addClass('result-detail-container');
-
-    // Claims table only
+    // Claims table
     if (result.claim_ids && result.claim_ids.length > 0) {
-        detailContainer.append($('<strong>').text('Claims Evaluated:').css('display', 'block').css('margin-bottom', '0.5rem'));
-        detailContainer.append(createClaimsTable(result.claim_ids));
+        html += '<strong style="display:block;margin-bottom:0.5rem;">Claims Evaluated:</strong>';
+        html += formatClaimsTable(result.claim_ids);
     } else {
-        detailContainer.append($('<p>').addClass('no-data').text('No claims associated with this result'));
+        html += '<p class="no-data">No claims associated with this result</p>';
     }
 
-    detailCell.append(detailContainer);
-    detailRow.append(detailCell);
+    html += '</div>';
+    return html;
+}
 
-    return detailRow;
+function formatClaimsTable(claimIds) {
+    let html = '<div class="claims-table-container">';
+    html += '<table class="claims-table">';
+    html += '<tbody>';
+
+    claimIds.forEach(claimId => {
+        const claim = window.manuscriptData.claims.find(c => c.id === claimId);
+        if (claim) {
+            const displayId = claim.claim_id || claimId;
+            html += '<tr>';
+            html += `<td class="claim-id-cell">${displayId}</td>`;
+            html += `<td class="claim-text-cell">${claim.claim}</td>`;
+            html += '</tr>';
+        }
+    });
+
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    return html;
 }
 
 function populateResultsPeer(results) {
@@ -378,114 +372,58 @@ function populateResultsPeer(results) {
     }
 
     // Create table structure
-    const table = $('<table>').addClass('results-table');
-    const thead = $('<thead>');
-    const headerRow = $('<tr>');
-    headerRow.append($('<th>').text('Status'));
-    headerRow.append($('<th>').text('# Claims'));
-    headerRow.append($('<th>').text('Reasoning'));
-    thead.append(headerRow);
-    table.append(thead);
+    container.html('<table id="peer-results-table" class="display results-table" style="width:100%"></table>');
 
-    const tbody = $('<tbody>');
+    // Prepare data for DataTables
+    const tableData = results.map(result => {
+        const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
+        const claimCount = result.claim_ids ? result.claim_ids.length : 0;
+        const reasoning = result.result_reasoning || '—';
 
-    // Store results data globally for access in click handler
-    window.peerResultsData = results;
-
-    results.forEach((result, index) => {
-        const row = $('<tr>').addClass('result-row').attr('data-peer-result-index', index);
-
-        // Status badge
-        row.append($('<td>').html(`<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`));
-
-        // Number of claims
-        row.append($('<td>').text(result.claim_ids ? result.claim_ids.length : 0));
-
-        // Reasoning (with expand button if long)
-        const reasoningCell = $('<td>').addClass('reasoning-cell');
-        if (result.result_reasoning) {
-            const maxLength = 150;
-            if (result.result_reasoning.length > maxLength) {
-                const shortReasoning = result.result_reasoning.substring(0, maxLength) + '...';
-                const reasoningSpan = $('<span>').text(shortReasoning);
-                const expandBtn = $('<button>').addClass('expand-button').text('Expand');
-
-                expandBtn.click(function(e) {
-                    e.stopPropagation(); // Prevent row click
-                    if (reasoningSpan.text().endsWith('...')) {
-                        reasoningSpan.text(result.result_reasoning);
-                        $(this).text('Collapse');
-                    } else {
-                        reasoningSpan.text(shortReasoning);
-                        $(this).text('Expand');
-                    }
-                });
-
-                reasoningCell.append(reasoningSpan).append(' ').append(expandBtn);
-            } else {
-                reasoningCell.text(result.result_reasoning);
-            }
-        } else {
-            reasoningCell.text('—');
-        }
-        row.append(reasoningCell);
-
-        tbody.append(row);
+        return [statusBadge, claimCount, reasoning];
     });
 
-    table.append(tbody);
-    container.append(table);
+    // Initialize DataTable
+    peerResultsTable = $('#peer-results-table').DataTable({
+        data: tableData,
+        columns: [
+            { title: 'Status', width: '20%' },
+            { title: '# Claims', width: '15%' },
+            { title: 'Reasoning', width: '65%' }
+        ],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        order: [[0, 'asc']],
+        language: {
+            search: 'Search results:',
+            lengthMenu: 'Show _MENU_ results',
+            info: 'Showing _START_ to _END_ of _TOTAL_ results'
+        }
+    });
 
     // Add click handler for expandable rows
-    $('[data-peer-result-index]').click(function() {
-        const index = $(this).data('peer-result-index');
-        const nextRow = $(this).next();
+    $('#peer-results-table tbody').on('click', 'tr', function() {
+        const row = peerResultsTable.row(this);
 
-        // Check if next row is already an expanded detail row
-        if (nextRow.hasClass('result-detail-row')) {
-            // Collapse: remove the detail row
-            nextRow.remove();
+        if (row.child.isShown()) {
+            row.child.hide();
             $(this).removeClass('expanded');
         } else {
-            // Expand: insert detail row
-            // First, collapse any other expanded rows in peer results
-            $('[data-peer-result-index]').removeClass('expanded');
-            $('[data-peer-result-index]').next('.result-detail-row').remove();
+            // Close all other rows
+            peerResultsTable.rows().every(function() {
+                if (this.child.isShown()) {
+                    this.child.hide();
+                    $(this.node()).removeClass('expanded');
+                }
+            });
 
-            const result = window.peerResultsData[index];
-            const detailRow = createResultDetailRow(result);
-            $(this).after(detailRow);
+            // Open this row
+            const rowIndex = peerResultsTable.row(this).index();
+            const result = results[rowIndex];
+            row.child(formatResultDetails(result)).show();
             $(this).addClass('expanded');
         }
     });
-}
-
-function createResultClaimsTable(claimIds) {
-    const container = $('<div>').addClass('result-claims-section');
-    container.append($('<strong>').text('Claims Evaluated:'));
-
-    const tableContainer = $('<div>').addClass('claims-table-container');
-    const table = $('<table>').addClass('claims-table');
-
-    const tbody = $('<tbody>');
-
-    claimIds.forEach(claimId => {
-        const claim = window.manuscriptData.claims.find(c => c.id === claimId);
-        if (claim) {
-            const row = $('<tr>');
-            // Use the simple claim_id (like "C1", "C2") if available, otherwise fallback to UUID
-            const displayId = claim.claim_id || claimId;
-            row.append($('<td>').addClass('claim-id-cell').text(displayId));
-            row.append($('<td>').addClass('claim-text-cell').text(claim.claim));
-            tbody.append(row);
-        }
-    });
-
-    table.append(tbody);
-    tableContainer.append(table);
-    container.append(tableContainer);
-
-    return container;
 }
 
 function populateComparisons(comparisons) {
@@ -494,157 +432,136 @@ function populateComparisons(comparisons) {
     tbody.empty();
 
     if (comparisons.length === 0) {
-        return;  // Keep section hidden
+        return;
     }
 
-    // Don't automatically show - let the stat card control visibility
-    // section.show();
+    // Clear existing table and create new one
+    $('#comparison-section .comparison-container').html('<table id="comparisons-table" class="display comparison-table" style="width:100%"></table>');
 
-    // Store comparisons data globally for access in click handler
-    window.comparisonsData = comparisons;
+    // Prepare data for DataTables
+    const tableData = comparisons.map(comp => {
+        const llmStatusBadge = `<span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`;
+        const peerStatusBadge = `<span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`;
+        const agreementBadge = `<span class="agreement-badge agreement-${comp.agreement_status}">${comp.agreement_status}</span>`;
+        const notes = comp.notes || '—';
 
-    comparisons.forEach((comp, index) => {
-        const row = $('<tr>').addClass('comparison-row').attr('data-comparison-index', index);
+        return [llmStatusBadge, peerStatusBadge, agreementBadge, notes];
+    });
 
-        // OpenEval Status
-        row.append($('<td>').html(`<span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
-
-        // Peer Status
-        row.append($('<td>').html(`<span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`));
-
-        // Agreement
-        const agreementClass = `agreement-${comp.agreement_status}`;
-        row.append($('<td>').html(`<span class="agreement-badge ${agreementClass}">${comp.agreement_status}</span>`));
-
-        // Notes (with expand button if long)
-        const notesCell = $('<td>');
-        if (comp.notes) {
-            if (comp.notes.length > 100) {
-                const shortNotes = comp.notes.substring(0, 100) + '...';
-                const notesSpan = $('<span>').text(shortNotes);
-                const expandBtn = $('<button>').addClass('expand-button').text('Expand');
-
-                expandBtn.click(function(e) {
-                    e.stopPropagation(); // Prevent row click
-                    if (notesSpan.text().endsWith('...')) {
-                        notesSpan.text(comp.notes);
-                        $(this).text('Collapse');
-                    } else {
-                        notesSpan.text(shortNotes);
-                        $(this).text('Expand');
-                    }
-                });
-
-                notesCell.append(notesSpan).append(' ').append(expandBtn);
-            } else {
-                notesCell.text(comp.notes);
-            }
-        } else {
-            notesCell.text('—');
+    // Initialize DataTable
+    comparisonsTable = $('#comparisons-table').DataTable({
+        data: tableData,
+        columns: [
+            { title: 'OpenEval Status', width: '20%' },
+            { title: 'Peer Status', width: '20%' },
+            { title: 'Agreement', width: '20%' },
+            { title: 'Notes', width: '40%' }
+        ],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        order: [[2, 'asc']],
+        language: {
+            search: 'Search comparisons:',
+            lengthMenu: 'Show _MENU_ comparisons',
+            info: 'Showing _START_ to _END_ of _TOTAL_ comparisons'
         }
-        row.append(notesCell);
-
-        tbody.append(row);
     });
 
     // Add click handler for expandable rows
-    $('.comparison-row').click(function() {
-        const index = $(this).data('comparison-index');
-        const nextRow = $(this).next();
+    $('#comparisons-table tbody').on('click', 'tr', function() {
+        const row = comparisonsTable.row(this);
 
-        // Check if next row is already an expanded detail row
-        if (nextRow.hasClass('comparison-detail-row')) {
-            // Collapse: remove the detail row
-            nextRow.remove();
+        if (row.child.isShown()) {
+            row.child.hide();
             $(this).removeClass('expanded');
         } else {
-            // Expand: insert detail row
-            // First, collapse any other expanded rows
-            $('.comparison-detail-row').remove();
-            $('.comparison-row').removeClass('expanded');
+            // Close all other rows
+            comparisonsTable.rows().every(function() {
+                if (this.child.isShown()) {
+                    this.child.hide();
+                    $(this.node()).removeClass('expanded');
+                }
+            });
 
-            const comp = window.comparisonsData[index];
-            const detailRow = createComparisonDetailRow(comp);
-            $(this).after(detailRow);
+            // Open this row
+            const rowIndex = comparisonsTable.row(this).index();
+            const comp = comparisons[rowIndex];
+            row.child(formatComparisonDetails(comp)).show();
             $(this).addClass('expanded');
         }
     });
 }
 
-function createComparisonDetailRow(comp) {
-    const detailRow = $('<tr>').addClass('comparison-detail-row');
-    const detailCell = $('<td>').attr('colspan', 4);
-
-    const detailContainer = $('<div>').addClass('comparison-detail-container');
-
+function formatComparisonDetails(comp) {
     // Find the full result objects
     const llmResult = window.manuscriptData.results_llm.find(r => r.id === comp.llm_result_id);
     const peerResult = window.manuscriptData.results_peer.find(r => r.id === comp.peer_result_id);
 
+    let html = '<div class="comparison-detail-container">';
+
     // Left side: OpenEval Result
-    const llmSide = $('<div>').addClass('result-detail-side');
-    llmSide.append($('<h4>').text('OpenEval Result'));
-    llmSide.append($('<div>').addClass('result-detail-field').html(`<strong>Status:</strong> <span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`));
+    html += '<div class="result-detail-side">';
+    html += '<h4>OpenEval Result</h4>';
+    html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span></div>`;
 
-    // Add reasoning first
     if (comp.llm_reasoning) {
-        llmSide.append($('<div>').addClass('result-detail-field').html(`<strong>Reasoning:</strong><div class="reasoning-box">${comp.llm_reasoning}</div>`));
+        html += '<div class="result-detail-field">';
+        html += '<strong>Reasoning:</strong>';
+        html += `<div class="reasoning-box">${comp.llm_reasoning}</div>`;
+        html += '</div>';
     }
 
-    // Add claims table after reasoning
     if (llmResult && llmResult.claim_ids && llmResult.claim_ids.length > 0) {
-        llmSide.append(createClaimsTable(llmResult.claim_ids));
+        html += formatClaimsTableWithLabel(llmResult.claim_ids);
     }
+
+    html += '</div>';
 
     // Right side: Peer Result
-    const peerSide = $('<div>').addClass('result-detail-side');
-    peerSide.append($('<h4>').text('Peer Result'));
-    peerSide.append($('<div>').addClass('result-detail-field').html(`<strong>Status:</strong> <span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`));
+    html += '<div class="result-detail-side">';
+    html += '<h4>Peer Result</h4>';
+    html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span></div>`;
 
-    // Add reasoning first
     if (comp.peer_reasoning) {
-        peerSide.append($('<div>').addClass('result-detail-field').html(`<strong>Reasoning:</strong><div class="reasoning-box">${comp.peer_reasoning}</div>`));
+        html += '<div class="result-detail-field">';
+        html += '<strong>Reasoning:</strong>';
+        html += `<div class="reasoning-box">${comp.peer_reasoning}</div>`;
+        html += '</div>';
     }
 
-    // Add claims table after reasoning
     if (peerResult && peerResult.claim_ids && peerResult.claim_ids.length > 0) {
-        peerSide.append(createClaimsTable(peerResult.claim_ids));
+        html += formatClaimsTableWithLabel(peerResult.claim_ids);
     }
 
-    detailContainer.append(llmSide);
-    detailContainer.append(peerSide);
-    detailCell.append(detailContainer);
-    detailRow.append(detailCell);
+    html += '</div>';
+    html += '</div>';
 
-    return detailRow;
+    return html;
 }
 
-function createClaimsTable(claimIds) {
-    const container = $('<div>').addClass('result-detail-field');
-    container.append($('<strong>').text('Claims:'));
-
-    const tableContainer = $('<div>').addClass('claims-table-container');
-    const table = $('<table>').addClass('claims-table');
-
-    const tbody = $('<tbody>');
+function formatClaimsTableWithLabel(claimIds) {
+    let html = '<div class="result-detail-field">';
+    html += '<strong>Claims:</strong>';
+    html += '<div class="claims-table-container">';
+    html += '<table class="claims-table">';
+    html += '<tbody>';
 
     claimIds.forEach(claimId => {
         const claim = window.manuscriptData.claims.find(c => c.id === claimId);
         if (claim) {
-            const row = $('<tr>');
-            // Use the simple claim_id (like "C1", "C2") if available, otherwise fallback to UUID
             const displayId = claim.claim_id || claimId;
-            row.append($('<td>').addClass('claim-id-cell').text(displayId));
-            row.append($('<td>').addClass('claim-text-cell').text(claim.claim));
-            tbody.append(row);
+            html += '<tr>';
+            html += `<td class="claim-id-cell">${displayId}</td>`;
+            html += `<td class="claim-text-cell">${claim.claim}</td>`;
+            html += '</tr>';
         }
     });
 
-    table.append(tbody);
-    tableContainer.append(table);
-    container.append(tableContainer);
-
-    return container;
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    html += '</div>';
+    return html;
 }
 
 function showError(message) {
