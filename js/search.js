@@ -173,6 +173,7 @@ function createResultCard(result, rank) {
                 <div class="claim-content">
                     <h3 class="claim-text">${escapeHtml(claim)}</h3>
                     <div class="claim-metadata">
+                        <span class="claim-id-badge">${escapeHtml(claim_id)}</span>
                         <span class="claim-type-badge">${escapeHtml(claim_type)}</span>
                         ${evidenceBadgesHtml}
                     </div>
