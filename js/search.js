@@ -121,6 +121,7 @@ function displayResults(data) {
 function createResultCard(result, rank) {
     const {
         claim_id,
+        claim_display_id,
         manuscript_id,
         claim,
         claim_type,
@@ -173,7 +174,7 @@ function createResultCard(result, rank) {
                 <div class="claim-content">
                     <h3 class="claim-text">${escapeHtml(claim)}</h3>
                     <div class="claim-metadata">
-                        <span class="claim-id-badge">${escapeHtml(claim_id)}</span>
+                        <span class="claim-id-badge">${escapeHtml(claim_display_id || claim_id)}</span>
                         <span class="claim-type-badge">${escapeHtml(claim_type)}</span>
                         ${evidenceBadgesHtml}
                     </div>
