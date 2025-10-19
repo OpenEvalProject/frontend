@@ -74,21 +74,21 @@ async function loadManuscripts() {
         }</a>`,
         manuscript.total_claims,
         manuscript.total_results_llm,
-        manuscript.total_results_peer || "—",
+        manuscript.total_results_peer || 0,
         manuscript.total_comparisons,
         manuscript.has_peer_reviews
           ? `<span class="agree-badge">${manuscript.agree_count || 0}</span>`
-          : '<span class="na-badge">—</span>',
+          : `<span class="na-badge">0</span>`,
         manuscript.has_peer_reviews
           ? `<span class="disjoint-badge">${
               manuscript.disjoint_count || 0
             }</span>`
-          : '<span class="na-badge">—</span>',
+          : `<span class="na-badge">0</span>`,
         manuscript.has_peer_reviews
           ? `<span class="disagree-badge">${
               manuscript.disagree_count || 0
             }</span>`
-          : '<span class="na-badge">—</span>',
+          : `<span class="na-badge">0</span>`,
         manuscript.id, // Hidden column for row click handling
       ];
     });
