@@ -69,6 +69,7 @@ async function loadManuscripts() {
     // Prepare data for DataTables
     const tableData = data.manuscripts.map((manuscript) => {
       return [
+        manuscript.pub_date || "", // Hidden sortable date (raw format)
         manuscript.pub_date ? formatDate(manuscript.pub_date) : "—",
         `<a href="/paper.html?id=${manuscript.id}">${
           manuscript.title || manuscript.id
@@ -101,7 +102,8 @@ async function loadManuscripts() {
     manuscriptsTable = $("#papers-list").DataTable({
       data: tableData,
       columns: [
-        { title: "Publication Date", width: "10%" },
+        { title: "Date (raw)", visible: false, searchable: false }, // Hidden sortable date
+        { title: "Publication Date", width: "10%", orderData: [0] }, // Sort using hidden column
         { title: "Article Title", width: "35%" },
         { title: "Total Claims", width: "8%" },
         { title: "OpenEval Results", width: "8%" },
@@ -115,7 +117,7 @@ async function loadManuscripts() {
       ],
       pageLength: 10,
       lengthMenu: [10, 25, 50, 100],
-      order: [[0, "desc"]], // Sort by date descending by default
+      order: [[1, "desc"]], // Sort by date descending by default (now column 1)
       responsive: true,
       language: {
         search: "Search manuscripts:",
@@ -132,9 +134,9 @@ async function loadManuscripts() {
           .off("click")
           .on("click", function () {
             const rowData = manuscriptsTable.row(this).data();
-            if (rowData && rowData[10]) {
-              // rowData[10] is the hidden ID column
-              window.location.href = `/paper.html?id=${rowData[10]}`;
+            if (rowData && rowData[11]) {
+              // rowData[11] is the hidden ID column (shifted by 1 due to hidden date column)
+              window.location.href = `/paper.html?id=${rowData[11]}`;
             }
           });
       },
