@@ -81,13 +81,16 @@ async function loadManuscripts() {
           ? `<span class="agree-badge">${manuscript.agree_count || 0}</span>`
           : `<span class="na-badge">0</span>`,
         manuscript.has_peer_reviews
-          ? `<span class="disjoint-badge">${
-              manuscript.disjoint_count || 0
-            }</span>`
+          ? `<span class="partial-badge">${manuscript.partial_count || 0}</span>`
           : `<span class="na-badge">0</span>`,
         manuscript.has_peer_reviews
           ? `<span class="disagree-badge">${
               manuscript.disagree_count || 0
+            }</span>`
+          : `<span class="na-badge">0</span>`,
+        manuscript.has_peer_reviews
+          ? `<span class="disjoint-badge">${
+              manuscript.disjoint_count || 0
             }</span>`
           : `<span class="na-badge">0</span>`,
         manuscript.id, // Hidden column for row click handling
@@ -104,9 +107,10 @@ async function loadManuscripts() {
         { title: "OpenEval Results", width: "8%" },
         { title: "Peer Results", width: "8%" },
         { title: "Comparisons", width: "8%" },
-        { title: "Agree", width: "7%" },
-        { title: "Disjoint", width: "7%" },
-        { title: "Disagree", width: "7%" },
+        { title: "Agree", width: "5%" },
+        { title: "Partial", width: "5%" },
+        { title: "Disagree", width: "5%" },
+        { title: "Disjoint", width: "5%" },
         { title: "ID", visible: false, searchable: false }, // Hidden ID column
       ],
       pageLength: 10,
@@ -128,9 +132,9 @@ async function loadManuscripts() {
           .off("click")
           .on("click", function () {
             const rowData = manuscriptsTable.row(this).data();
-            if (rowData && rowData[9]) {
-              // rowData[9] is the hidden ID column
-              window.location.href = `/paper.html?id=${rowData[9]}`;
+            if (rowData && rowData[10]) {
+              // rowData[10] is the hidden ID column
+              window.location.href = `/paper.html?id=${rowData[10]}`;
             }
           });
       },

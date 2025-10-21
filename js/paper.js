@@ -277,20 +277,22 @@ function populateResultsLLM(results) {
 
     // Prepare data for DataTables
     const tableData = results.map(result => {
+        const resultText = result.result || '—';
         const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
         const claimCount = result.claim_ids ? result.claim_ids.length : 0;
         const reasoning = result.result_reasoning || '—';
 
-        return [statusBadge, claimCount, reasoning];
+        return [resultText, statusBadge, claimCount, reasoning];
     });
 
     // Initialize DataTable
     llmResultsTable = $('#llm-results-table').DataTable({
         data: tableData,
         columns: [
-            { title: 'Status', width: '20%' },
-            { title: '# Claims', width: '15%' },
-            { title: 'Reasoning', width: '65%' }
+            { title: 'Result', width: '30%' },
+            { title: 'Status', width: '15%' },
+            { title: '# Claims', width: '10%' },
+            { title: 'Reasoning', width: '45%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -377,20 +379,22 @@ function populateResultsPeer(results) {
 
     // Prepare data for DataTables
     const tableData = results.map(result => {
+        const resultText = result.result || '—';
         const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
         const claimCount = result.claim_ids ? result.claim_ids.length : 0;
         const reasoning = result.result_reasoning || '—';
 
-        return [statusBadge, claimCount, reasoning];
+        return [resultText, statusBadge, claimCount, reasoning];
     });
 
     // Initialize DataTable
     peerResultsTable = $('#peer-results-table').DataTable({
         data: tableData,
         columns: [
-            { title: 'Status', width: '20%' },
-            { title: '# Claims', width: '15%' },
-            { title: 'Reasoning', width: '65%' }
+            { title: 'Result', width: '30%' },
+            { title: 'Status', width: '15%' },
+            { title: '# Claims', width: '10%' },
+            { title: 'Reasoning', width: '45%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -441,12 +445,12 @@ function populateComparisons(comparisons) {
 
     // Prepare data for DataTables
     const tableData = comparisons.map(comp => {
-        const llmStatusBadge = `<span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span>`;
+        const openevalStatusBadge = `<span class="status-badge status-${(comp.openeval_status || '').toLowerCase()}">${comp.openeval_status || 'N/A'}</span>`;
         const peerStatusBadge = `<span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`;
         const agreementBadge = `<span class="agreement-badge agreement-${comp.agreement_status}">${comp.agreement_status}</span>`;
-        const notes = comp.notes || '—';
+        const comparison = comp.comparison || '—';
 
-        return [llmStatusBadge, peerStatusBadge, agreementBadge, notes];
+        return [openevalStatusBadge, peerStatusBadge, agreementBadge, comparison];
     });
 
     // Initialize DataTable
@@ -456,7 +460,7 @@ function populateComparisons(comparisons) {
             { title: 'OpenEval Status', width: '20%' },
             { title: 'Peer Status', width: '20%' },
             { title: 'Agreement', width: '20%' },
-            { title: 'Notes', width: '40%' }
+            { title: 'Comparison', width: '40%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -495,7 +499,7 @@ function populateComparisons(comparisons) {
 
 function formatComparisonDetails(comp) {
     // Find the full result objects
-    const llmResult = window.manuscriptData.results_llm.find(r => r.id === comp.llm_result_id);
+    const openevalResult = window.manuscriptData.results_llm.find(r => r.id === comp.openeval_result_id);
     const peerResult = window.manuscriptData.results_peer.find(r => r.id === comp.peer_result_id);
 
     let html = '<div class="comparison-detail-container">';
@@ -503,17 +507,24 @@ function formatComparisonDetails(comp) {
     // Left side: OpenEval Result
     html += '<div class="result-detail-side">';
     html += '<h4>OpenEval Result</h4>';
-    html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.llm_status || '').toLowerCase()}">${comp.llm_status || 'N/A'}</span></div>`;
+    html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.openeval_status || '').toLowerCase()}">${comp.openeval_status || 'N/A'}</span></div>`;
 
-    if (comp.llm_reasoning) {
+    if (openevalResult && openevalResult.result) {
         html += '<div class="result-detail-field">';
-        html += '<strong>Reasoning:</strong>';
-        html += `<div class="reasoning-box">${comp.llm_reasoning}</div>`;
+        html += '<strong>Result:</strong>';
+        html += `<div class="result-text-box">${openevalResult.result}</div>`;
         html += '</div>';
     }
 
-    if (llmResult && llmResult.claim_ids && llmResult.claim_ids.length > 0) {
-        html += formatClaimsTableWithLabel(llmResult.claim_ids);
+    if (comp.openeval_reasoning) {
+        html += '<div class="result-detail-field">';
+        html += '<strong>Reasoning:</strong>';
+        html += `<div class="reasoning-box">${comp.openeval_reasoning}</div>`;
+        html += '</div>';
+    }
+
+    if (openevalResult && openevalResult.claim_ids && openevalResult.claim_ids.length > 0) {
+        html += formatClaimsTableWithLabel(openevalResult.claim_ids);
     }
 
     html += '</div>';
@@ -522,6 +533,13 @@ function formatComparisonDetails(comp) {
     html += '<div class="result-detail-side">';
     html += '<h4>Peer Result</h4>';
     html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span></div>`;
+
+    if (peerResult && peerResult.result) {
+        html += '<div class="result-detail-field">';
+        html += '<strong>Result:</strong>';
+        html += `<div class="result-text-box">${peerResult.result}</div>`;
+        html += '</div>';
+    }
 
     if (comp.peer_reasoning) {
         html += '<div class="result-detail-field">';

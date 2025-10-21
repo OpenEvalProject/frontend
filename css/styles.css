@@ -52,7 +52,7 @@ nav button:hover {
 
 /* Main content */
 main {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 2rem auto;
     padding: 0 2rem;
 }
@@ -66,9 +66,14 @@ section {
 }
 
 /* Papers table */
+.papers-table {
+    overflow-x: auto;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;
 }
 
 thead {
@@ -813,7 +818,7 @@ footer {
    ============================================================================ */
 
 /* Agreement badges (for list view) */
-.agree-badge, .disjoint-badge, .disagree-badge, .na-badge {
+.agree-badge, .partial-badge, .disjoint-badge, .disagree-badge, .na-badge {
     display: inline-block;
     padding: 0.25rem 0.6rem;
     border-radius: 12px;
@@ -824,6 +829,11 @@ footer {
 .agree-badge {
     background: #d4edda;
     color: #155724;
+}
+
+.partial-badge {
+    background: #d1ecf1;
+    color: #0c5460;
 }
 
 .disjoint-badge {
@@ -1194,6 +1204,17 @@ footer {
     background: #f8f9fa;
     padding: 1rem;
     border-left: 4px solid #9b59b6;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #555;
+    margin-top: 0.5rem;
+}
+
+.result-text-box {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-left: 4px solid #3498db;
     border-radius: 4px;
     font-size: 0.95rem;
     line-height: 1.6;
@@ -2111,6 +2132,11 @@ footer {
 /* DataTables styling overrides */
 .dataTables_wrapper {
     padding: 1rem 0;
+    overflow-x: auto;
+}
+
+.dataTables_wrapper .dataTable {
+    min-width: 100%;
 }
 
 .dataTables_wrapper .dataTables_length,
