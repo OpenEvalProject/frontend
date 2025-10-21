@@ -44,9 +44,8 @@ async function loadManuscripts() {
       credentials: "include",
     });
 
-    $("#loading").hide();
-
     if (!response.ok) {
+      $("#loading").hide();
       console.error("API error:", response.status, response.statusText);
       $("#no-papers")
         .text(
@@ -57,6 +56,7 @@ async function loadManuscripts() {
     }
 
     const data = await response.json();
+    $("#loading").hide();
 
     if (!data.manuscripts || data.manuscripts.length === 0) {
       $("#no-papers").show();
