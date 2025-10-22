@@ -106,7 +106,6 @@ async function loadManuscript(manuscriptId) {
         // Populate comparisons (if exist)
         if (data.summary_stats.has_peer_reviews && data.comparisons.length > 0) {
             $('#comparisons-stat').show();
-            $('#total-comparisons').text(data.comparisons.length);
             populateComparisons(data.comparisons);
         }
 
@@ -151,6 +150,20 @@ function populateSummaryStats(stats) {
     $('#total-claims').text(stats.total_claims);
     $('#total-results-llm').text(stats.total_results_llm);
     $('#total-results-peer').text(stats.total_results_peer);
+
+    // Update comparison stats with agreement breakdown
+    if (stats.total_comparisons > 0) {
+        $('#total-comparisons').text(stats.total_comparisons);
+
+        // Show breakdown if we have agreement counts
+        if (stats.agree_count !== null) {
+            $('#agree-count-badge').text(stats.agree_count || 0);
+            $('#partial-count-badge').text(stats.partial_count || 0);
+            $('#disagree-count-badge').text(stats.disagree_count || 0);
+            $('#disjoint-count-badge').text(stats.disjoint_count || 0);
+            $('#comparison-breakdown').show();
+        }
+    }
 }
 
 function populateClaims(claims) {
