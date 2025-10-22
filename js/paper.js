@@ -151,6 +151,22 @@ function populateSummaryStats(stats) {
     $('#total-results-llm').text(stats.total_results_llm);
     $('#total-results-peer').text(stats.total_results_peer);
 
+    // Update LLM results breakdown
+    if (stats.total_results_llm > 0) {
+        $('#llm-supported-count').text(stats.llm_supported_count || 0);
+        $('#llm-unsupported-count').text(stats.llm_unsupported_count || 0);
+        $('#llm-uncertain-count').text(stats.llm_uncertain_count || 0);
+        $('#llm-breakdown').show();
+    }
+
+    // Update peer results breakdown (if peer reviews exist)
+    if (stats.has_peer_reviews && stats.total_results_peer > 0) {
+        $('#peer-supported-count').text(stats.peer_supported_count || 0);
+        $('#peer-unsupported-count').text(stats.peer_unsupported_count || 0);
+        $('#peer-uncertain-count').text(stats.peer_uncertain_count || 0);
+        $('#peer-breakdown').show();
+    }
+
     // Update comparison stats with agreement breakdown
     if (stats.total_comparisons > 0) {
         $('#total-comparisons').text(stats.total_comparisons);

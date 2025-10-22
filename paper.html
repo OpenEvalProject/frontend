@@ -53,11 +53,21 @@
                     <div class="stat-card clickable" data-target="llm-results-container">
                         <div class="stat-value" id="total-results-llm">0</div>
                         <div class="stat-label">OpenEval Results</div>
+                        <div class="stat-breakdown" id="llm-breakdown" style="display:none; font-size: 0.75rem; margin-top: 0.5rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <span class="status-badge status-supported">Supported: <span id="llm-supported-count">0</span></span>
+                            <span class="status-badge status-unsupported">Unsupported: <span id="llm-unsupported-count">0</span></span>
+                            <span class="status-badge status-uncertain">Uncertain: <span id="llm-uncertain-count">0</span></span>
+                        </div>
                         <div class="stat-hint">Click to view</div>
                     </div>
                     <div class="stat-card clickable" data-target="peer-results-container" id="peer-results-stat" style="display:none;">
                         <div class="stat-value" id="total-results-peer">0</div>
                         <div class="stat-label">Peer Results</div>
+                        <div class="stat-breakdown" id="peer-breakdown" style="display:none; font-size: 0.75rem; margin-top: 0.5rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <span class="status-badge status-supported">Supported: <span id="peer-supported-count">0</span></span>
+                            <span class="status-badge status-unsupported">Unsupported: <span id="peer-unsupported-count">0</span></span>
+                            <span class="status-badge status-uncertain">Uncertain: <span id="peer-uncertain-count">0</span></span>
+                        </div>
                         <div class="stat-hint">Click to view</div>
                     </div>
                     <div class="stat-card clickable" data-target="comparison-section" id="comparisons-stat" style="display:none;">
