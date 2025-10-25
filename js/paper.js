@@ -137,13 +137,12 @@ function populateOverview(metadata) {
         $('#manuscript-abstract-container').show();
     }
 
-    // Display publication date if available
+    // Display publication date
     if (metadata.pub_date) {
         $('#manuscript-pub-date').text(formatDate(metadata.pub_date));
-        $('#pub-date-container').show();
+    } else {
+        $('#manuscript-pub-date').text('Not available');
     }
-
-    $('#manuscript-date').text(formatDate(metadata.created_at));
 }
 
 function populateSummaryStats(stats) {
@@ -272,19 +271,29 @@ function formatClaimDetails(claim) {
     html += `<div class="claim-full-text">${claim.claim}</div>`;
     html += '</div>';
 
-    // Source text
-    if (claim.source_text) {
+    // Source text (field name changed from source_text to source)
+    if (claim.source) {
         html += '<div class="claim-detail-field">';
         html += '<strong>Source Text:</strong>';
-        html += `<div class="source-text-box">${claim.source_text}</div>`;
+        html += `<div class="source-text-box">${claim.source}</div>`;
         html += '</div>';
     }
 
-    // Evidence reasoning
-    if (claim.evidence_reasoning) {
+    // Source type badges
+    if (claim.source_type && claim.source_type.length > 0) {
         html += '<div class="claim-detail-field">';
-        html += '<strong>Evidence Reasoning:</strong>';
-        html += `<div class="reasoning-box">${claim.evidence_reasoning}</div>`;
+        html += '<strong>Source Type:</strong> ';
+        html += claim.source_type.map(type =>
+            `<span class="evidence-type-tag">${type}</span>`
+        ).join(' ');
+        html += '</div>';
+    }
+
+    // Evidence reasoning (field name changed from evidence_reasoning to evidence)
+    if (claim.evidence) {
+        html += '<div class="claim-detail-field">';
+        html += '<strong>Evidence:</strong>';
+        html += `<div class="reasoning-box">${claim.evidence}</div>`;
         html += '</div>';
     }
 
@@ -306,22 +315,32 @@ function populateResultsLLM(results) {
 
     // Prepare data for DataTables
     const tableData = results.map(result => {
+        const resultId = result.result_id || result.id.slice(0, 8);
         const resultText = result.result || '—';
         const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
         const claimCount = result.claim_ids ? result.claim_ids.length : 0;
+
+        // Get result types from comparisons
+        const resultTypes = getResultTypesForResult(result.id);
+        const typeBadges = resultTypes.length > 0
+            ? resultTypes.map(type => `<span class="result-type-badge result-type-${type.toLowerCase()}">${type}</span>`).join(' ')
+            : '—';
+
         const reasoning = result.result_reasoning || '—';
 
-        return [resultText, statusBadge, claimCount, reasoning];
+        return [resultId, resultText, statusBadge, typeBadges, claimCount, reasoning];
     });
 
     // Initialize DataTable
     llmResultsTable = $('#llm-results-table').DataTable({
         data: tableData,
         columns: [
-            { title: 'Result', width: '30%' },
-            { title: 'Status', width: '15%' },
-            { title: '# Claims', width: '10%' },
-            { title: 'Reasoning', width: '45%' }
+            { title: 'Result ID', width: '8%' },
+            { title: 'Result', width: '22%' },
+            { title: 'Status', width: '10%' },
+            { title: 'Type', width: '10%' },
+            { title: '# Claims', width: '7%' },
+            { title: 'Reasoning', width: '43%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -373,21 +392,45 @@ function formatResultDetails(result) {
     return html;
 }
 
+function getResultTypesForResult(resultId) {
+    // Find all comparisons that reference this result
+    const types = new Set();
+
+    if (window.manuscriptData.comparisons) {
+        window.manuscriptData.comparisons.forEach(comp => {
+            if (comp.openeval_result_id === resultId && comp.openeval_result_type) {
+                types.add(comp.openeval_result_type);
+            }
+            if (comp.peer_result_id === resultId && comp.peer_result_type) {
+                types.add(comp.peer_result_type);
+            }
+        });
+    }
+
+    return Array.from(types);
+}
+
 function formatClaimsTable(claimIds) {
     let html = '<div class="claims-table-container">';
     html += '<table class="claims-table">';
     html += '<tbody>';
 
-    claimIds.forEach(claimId => {
-        const claim = window.manuscriptData.claims.find(c => c.id === claimId);
-        if (claim) {
-            const displayId = claim.claim_id || claimId;
-            html += '<tr>';
-            html += `<td class="claim-id-cell">${displayId}</td>`;
-            html += `<td class="claim-text-cell">${claim.claim}</td>`;
-            html += '</tr>';
-        }
-    });
+    if (!claimIds || claimIds.length === 0) {
+        html += '<tr><td colspan="2" class="no-data">No claims associated</td></tr>';
+    } else {
+        claimIds.forEach(claimId => {
+            // Match by claim_id (C1, C2, etc.) not by UUID
+            const claim = window.manuscriptData.claims.find(c => c.claim_id === claimId);
+            if (claim) {
+                html += '<tr>';
+                html += `<td class="claim-id-cell">${claimId}</td>`;
+                html += `<td class="claim-text-cell">${claim.claim}</td>`;
+                html += '</tr>';
+            } else {
+                console.log('Claim not found for claim_id:', claimId);
+            }
+        });
+    }
 
     html += '</tbody>';
     html += '</table>';
@@ -408,22 +451,32 @@ function populateResultsPeer(results) {
 
     // Prepare data for DataTables
     const tableData = results.map(result => {
+        const resultId = result.result_id || result.id.slice(0, 8);
         const resultText = result.result || '—';
         const statusBadge = `<span class="status-badge status-${result.result_status.toLowerCase()}">${result.result_status}</span>`;
         const claimCount = result.claim_ids ? result.claim_ids.length : 0;
+
+        // Get result types from comparisons
+        const resultTypes = getResultTypesForResult(result.id);
+        const typeBadges = resultTypes.length > 0
+            ? resultTypes.map(type => `<span class="result-type-badge result-type-${type.toLowerCase()}">${type}</span>`).join(' ')
+            : '—';
+
         const reasoning = result.result_reasoning || '—';
 
-        return [resultText, statusBadge, claimCount, reasoning];
+        return [resultId, resultText, statusBadge, typeBadges, claimCount, reasoning];
     });
 
     // Initialize DataTable
     peerResultsTable = $('#peer-results-table').DataTable({
         data: tableData,
         columns: [
-            { title: 'Result', width: '30%' },
-            { title: 'Status', width: '15%' },
-            { title: '# Claims', width: '10%' },
-            { title: 'Reasoning', width: '45%' }
+            { title: 'Result ID', width: '8%' },
+            { title: 'Result', width: '22%' },
+            { title: 'Status', width: '10%' },
+            { title: 'Type', width: '10%' },
+            { title: '# Claims', width: '7%' },
+            { title: 'Reasoning', width: '43%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -476,20 +529,31 @@ function populateComparisons(comparisons) {
     const tableData = comparisons.map(comp => {
         const openevalStatusBadge = `<span class="status-badge status-${(comp.openeval_status || '').toLowerCase()}">${comp.openeval_status || 'N/A'}</span>`;
         const peerStatusBadge = `<span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span>`;
+
+        // NEW: Display result type badges with type-specific colors
+        const openevalTypeBadge = comp.openeval_result_type
+            ? `<span class="result-type-badge result-type-${comp.openeval_result_type.toLowerCase()}">${comp.openeval_result_type}</span>`
+            : '—';
+        const peerTypeBadge = comp.peer_result_type
+            ? `<span class="result-type-badge result-type-${comp.peer_result_type.toLowerCase()}">${comp.peer_result_type}</span>`
+            : '—';
+
         const agreementBadge = `<span class="agreement-badge agreement-${comp.agreement_status}">${comp.agreement_status}</span>`;
         const comparison = comp.comparison || '—';
 
-        return [openevalStatusBadge, peerStatusBadge, agreementBadge, comparison];
+        return [openevalStatusBadge, openevalTypeBadge, peerStatusBadge, peerTypeBadge, agreementBadge, comparison];
     });
 
     // Initialize DataTable
     comparisonsTable = $('#comparisons-table').DataTable({
         data: tableData,
         columns: [
-            { title: 'OpenEval Status', width: '20%' },
-            { title: 'Peer Status', width: '20%' },
-            { title: 'Agreement', width: '20%' },
-            { title: 'Comparison', width: '40%' }
+            { title: 'OpenEval Status', width: '15%' },
+            { title: 'OpenEval Type', width: '12%' },
+            { title: 'Peer Status', width: '15%' },
+            { title: 'Peer Type', width: '12%' },
+            { title: 'Agreement', width: '15%' },
+            { title: 'Comparison', width: '31%' }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50],
@@ -538,6 +602,11 @@ function formatComparisonDetails(comp) {
     html += '<h4>OpenEval Result</h4>';
     html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.openeval_status || '').toLowerCase()}">${comp.openeval_status || 'N/A'}</span></div>`;
 
+    // NEW: Display result type
+    if (comp.openeval_result_type) {
+        html += `<div class="result-detail-field"><strong>Type:</strong> <span class="result-type-badge result-type-${comp.openeval_result_type.toLowerCase()}">${comp.openeval_result_type}</span></div>`;
+    }
+
     if (openevalResult && openevalResult.result) {
         html += '<div class="result-detail-field">';
         html += '<strong>Result:</strong>';
@@ -562,6 +631,11 @@ function formatComparisonDetails(comp) {
     html += '<div class="result-detail-side">';
     html += '<h4>Peer Result</h4>';
     html += `<div class="result-detail-field"><strong>Status:</strong> <span class="status-badge status-${(comp.peer_status || '').toLowerCase()}">${comp.peer_status || 'N/A'}</span></div>`;
+
+    // NEW: Display result type
+    if (comp.peer_result_type) {
+        html += `<div class="result-detail-field"><strong>Type:</strong> <span class="result-type-badge result-type-${comp.peer_result_type.toLowerCase()}">${comp.peer_result_type}</span></div>`;
+    }
 
     if (peerResult && peerResult.result) {
         html += '<div class="result-detail-field">';
@@ -595,13 +669,15 @@ function formatClaimsTableWithLabel(claimIds) {
     html += '<tbody>';
 
     claimIds.forEach(claimId => {
-        const claim = window.manuscriptData.claims.find(c => c.id === claimId);
+        // Match by claim_id (C1, C2, etc.) not by UUID
+        const claim = window.manuscriptData.claims.find(c => c.claim_id === claimId);
         if (claim) {
-            const displayId = claim.claim_id || claimId;
             html += '<tr>';
-            html += `<td class="claim-id-cell">${displayId}</td>`;
+            html += `<td class="claim-id-cell">${claimId}</td>`;
             html += `<td class="claim-text-cell">${claim.claim}</td>`;
             html += '</tr>';
+        } else {
+            console.log('Claim not found for claim_id:', claimId);
         }
     });
 

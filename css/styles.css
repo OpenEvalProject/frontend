@@ -1640,6 +1640,35 @@ footer {
     background: #95a5a6;
 }
 
+/* NEW: Result type badge (MAJOR, MINOR, DATA, METHOD, etc.) */
+.result-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #16a085;
+    color: white;
+}
+
+/* Specific colors for result types */
+.result-type-badge.result-type-major {
+    background: #e74c3c !important;  /* red */
+}
+
+.result-type-badge.result-type-minor {
+    background: #f39c12 !important;  /* orange */
+}
+
+.result-type-badge.result-type-data {
+    background: #3498db !important;  /* blue */
+}
+
+.result-type-badge.result-type-method {
+    background: #9b59b6 !important;  /* purple */
+}
+
 /* Pagination Controls */
 #pagination-controls {
     display: flex;
