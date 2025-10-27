@@ -88,6 +88,9 @@ async function loadManuscript(manuscriptId) {
         // Populate manuscript overview
         populateOverview(data.metadata);
 
+        // Load and populate authors
+        await loadAuthors(manuscriptId);
+
         // Populate summary stats
         populateSummaryStats(data.summary_stats);
 
@@ -143,6 +146,101 @@ function populateOverview(metadata) {
     } else {
         $('#manuscript-pub-date').text('Not available');
     }
+}
+
+async function loadAuthors(manuscriptId) {
+    try {
+        const response = await fetch(`/api/papers/${manuscriptId}/authors`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            console.error('Failed to load authors:', response.statusText);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.authors && data.authors.length > 0) {
+            populateAuthors(data.authors);
+            $('#manuscript-authors-container').show();
+        }
+    } catch (error) {
+        console.error('Error loading authors:', error);
+    }
+}
+
+function populateAuthors(authors) {
+    const tbody = $('#manuscript-authors');
+    tbody.empty();
+
+    authors.forEach(author => {
+        const row = $('<tr></tr>');
+
+        // Author name column
+        const authorName = `${author.given_names} ${author.surname}`;
+        const nameCell = $('<td class="author-name-cell"></td>').text(authorName);
+        row.append(nameCell);
+
+        // Affiliation column
+        const affiliationCell = $('<td class="author-affiliation-cell"></td>');
+        if (author.affiliations && author.affiliations.length > 0) {
+            const affiliationParts = author.affiliations.map(aff => {
+                const affParts = [];
+                if (aff.department) affParts.push(aff.department);
+                if (aff.institution) affParts.push(aff.institution);
+                if (aff.city) affParts.push(aff.city);
+                if (aff.country) affParts.push(aff.country);
+                return affParts.length > 0 ? affParts.join(', ') : null;
+            }).filter(aff => aff !== null);
+
+            if (affiliationParts.length > 0) {
+                affiliationCell.text(affiliationParts.join('; '));
+            } else {
+                affiliationCell.text('—');
+            }
+        } else {
+            affiliationCell.text('—');
+        }
+        row.append(affiliationCell);
+
+        // Badges column
+        const badgesCell = $('<td class="author-badges-cell"></td>');
+        const badges = [];
+
+        if (author.orcid) {
+            const orcidLink = $('<a></a>')
+                .attr('href', `https://orcid.org/${author.orcid}`)
+                .attr('target', '_blank')
+                .attr('rel', 'noopener noreferrer')
+                .addClass('orcid-link');
+
+            const orcidBadge = $('<span class="orcid-badge"></span>')
+                .attr('title', `ORCID: ${author.orcid}`)
+                .text('ORCID');
+
+            orcidLink.append(orcidBadge);
+            badges.push(orcidLink);
+        }
+
+        if (author.corresponding) {
+            const corrBadge = $('<span class="corresponding-badge"></span>')
+                .text('Corresponding');
+            badges.push(corrBadge);
+        }
+
+        if (badges.length > 0) {
+            badges.forEach((badge, index) => {
+                if (index > 0) badgesCell.append(' ');
+                badgesCell.append(badge);
+            });
+        } else {
+            badgesCell.text('—');
+        }
+        row.append(badgesCell);
+
+        tbody.append(row);
+    });
 }
 
 function populateSummaryStats(stats) {

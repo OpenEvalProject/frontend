@@ -13,9 +13,8 @@
         <h1>OpenEval Project</h1>
         <nav>
             <a href="/index.html">← Back to Manuscripts</a>
-            <a href="/search.html">
-                <button>Search Claims</button>
-            </a>
+            <a href="/papers-search.html"><button>Search Papers</button></a>
+            <a href="/results.html"><button>Explore Results</button></a>
             <span id="user-info"></span>
             <button id="login-btn">Login with ORCID</button>
             <button id="logout-btn" style="display:none;">Logout</button>
@@ -34,6 +33,22 @@
                     <p><strong>Manuscript ID:</strong> <span id="manuscript-id"></span></p>
                     <p><strong>DOI:</strong> <a id="manuscript-doi" href="#" target="_blank" rel="noopener noreferrer"></a></p>
                     <p id="pub-date-container"><strong>Publication Date:</strong> <span id="manuscript-pub-date"></span></p>
+                </div>
+                <div class="paper-authors" id="manuscript-authors-container" style="display:none;">
+                    <h3>Authors</h3>
+                    <div class="authors-table-wrapper">
+                        <table id="manuscript-authors-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Affiliation</th>
+                                    <th>Badges</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manuscript-authors">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="paper-abstract" id="manuscript-abstract-container" style="display:none;">
                     <h3>Abstract</h3>

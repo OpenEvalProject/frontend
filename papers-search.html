@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Papers - OpenEval Project</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>OpenEval Project</h1>
+        <nav>
+            <a href="/"><button>Home</button></a>
+            <a href="/results.html"><button>Explore Results</button></a>
+            <span id="user-info"><!-- Populated by JS --></span>
+            <button id="login-btn">Login with ORCID</button>
+            <button id="logout-btn" style="display:none;">Logout</button>
+            <a href="/submit.html" id="submit-link" style="display:none;">
+                <button>Submit New Paper</button>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="search-container">
+            <h1>Search Papers</h1>
+            <p class="search-description">
+                Search for papers by author name, institution, or ORCID ID. Click any paper to view detailed claim analysis and peer review comparisons.
+            </p>
+
+            <!-- Search Form -->
+            <div class="search-form">
+                <div class="search-input-container">
+                    <input
+                        type="text"
+                        id="search-query"
+                        placeholder="Enter author name, institution, or ORCID ID"
+                        autocomplete="off"
+                    />
+                    <button id="search-btn" class="primary-btn">Search</button>
+                </div>
+
+                <div class="search-options">
+                    <div class="search-type-radio-group">
+                        <label class="search-type-label">Search by:</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="radio" name="search-type" value="author" checked>
+                                <span>Author Name</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="search-type" value="institution">
+                                <span>Institution</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="search-type" value="orcid">
+                                <span>ORCID ID</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="result-limit-group">
+                        <label for="result-limit">Results:</label>
+                        <select id="result-limit">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50" selected>50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="search-loading" class="loading-state" style="display:none;">
+                <div class="spinner"></div>
+                <p>Searching papers...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="search-error" class="error-state" style="display:none;">
+                <p class="error-message"></p>
+            </div>
+
+            <!-- Results Container -->
+            <div id="search-results" style="display:none;">
+                <div class="results-header">
+                    <h2>Search Results</h2>
+                    <p class="results-meta">
+                        Found <span id="result-count">0</span> papers for
+                        "<span id="query-display"></span>"
+                    </p>
+                </div>
+
+                <div id="results-list">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="38" cy="38" r="28" stroke="#bdc3c7" stroke-width="4"/>
+                    <line x1="58" y1="58" x2="78" y2="78" stroke="#bdc3c7" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                <h3>Start Searching</h3>
+                <p>Enter a query above to search for papers by author, institution, or ORCID</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>OpenEval Project - Transparent LLM-enabled peer review assessment</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js?v=2"></script>
+    <script src="/js/papers-search.js?v=1"></script>
+</body>
+</html>

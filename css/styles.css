@@ -1835,8 +1835,9 @@ footer {
 .search-options {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 2rem;
     color: #555;
+    flex-wrap: wrap;
 }
 
 .search-options label {
@@ -1849,6 +1850,58 @@ footer {
     border-radius: 4px;
     font-size: 0.95rem;
     cursor: pointer;
+}
+
+/* Radio button group for search type */
+.search-type-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-type-label {
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.radio-options {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    font-weight: normal;
+}
+
+.radio-option:hover {
+    background-color: #f0f0f0;
+}
+
+.radio-option input[type="radio"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #3498db;
+}
+
+.radio-option span {
+    font-size: 0.95rem;
+    user-select: none;
+}
+
+/* Result limit group */
+.result-limit-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* Loading state */
@@ -2335,4 +2388,130 @@ table.dataTable.display tbody tr.odd:hover {
 table.dataTable.stripe tbody tr.even:hover,
 table.dataTable.display tbody tr.even:hover {
     background-color: white !important;
+}
+
+/* ============================================================================
+   AUTHOR TABLE STYLES
+   ============================================================================ */
+
+/* Authors section container */
+.paper-authors {
+    margin: 1.5rem 0;
+}
+
+.paper-authors h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+/* Scrollable wrapper for authors table */
+.authors-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+/* Authors table */
+#manuscript-authors-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+#manuscript-authors-table thead {
+    position: sticky;
+    top: 0;
+    background: #ecf0f1;
+    z-index: 10;
+}
+
+#manuscript-authors-table thead th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #bdc3c7;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+#manuscript-authors-table tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.2s;
+}
+
+#manuscript-authors-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#manuscript-authors-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+#manuscript-authors-table td {
+    padding: 0.75rem;
+    vertical-align: top;
+}
+
+/* Author name cell */
+.author-name-cell {
+    font-weight: 500;
+    color: #2c3e50;
+    white-space: nowrap;
+    min-width: 150px;
+}
+
+/* Affiliation cell */
+.author-affiliation-cell {
+    color: #555;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    max-width: 500px;
+}
+
+/* Badges cell */
+.author-badges-cell {
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* ORCID link wrapper */
+.orcid-link {
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 0.25rem;
+}
+
+.orcid-link:hover .orcid-badge {
+    background: #8cb32a;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ORCID badge */
+.orcid-badge {
+    display: inline-block;
+    background: #a6ce39;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Corresponding author badge */
+.corresponding-badge {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
