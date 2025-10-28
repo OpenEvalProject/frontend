@@ -14,8 +14,8 @@ $(document).ready(async function() {
     // Load manuscript details
     await loadManuscript(manuscriptId);
 
-    // Handle stat card clicks to toggle content
-    $(document).on('click', '.stat-card.clickable', function() {
+    // Handle stat card clicks to toggle content (updated for compact layout)
+    $(document).on('click', '.stat-card-compact.clickable, .stat-card.clickable', function() {
         const target = $(this).data('target');
         const container = $(`#${target}`);
 
@@ -23,7 +23,7 @@ $(document).ready(async function() {
         if (target === 'comparison-section') {
             // Close all collapsible containers
             $('.collapsible-content').removeClass('expanded').addClass('collapsed');
-            $('.stat-card.clickable').not(this).removeClass('active');
+            $('.stat-card-compact.clickable, .stat-card.clickable').not(this).removeClass('active');
 
             // Toggle comparison section
             if (container.is(':visible')) {
@@ -38,7 +38,7 @@ $(document).ready(async function() {
             // Close all other containers and comparison section
             $('.collapsible-content').not(container).removeClass('expanded').addClass('collapsed');
             $('#comparison-section').hide();
-            $('.stat-card.clickable').not(this).removeClass('active');
+            $('.stat-card-compact.clickable, .stat-card.clickable').not(this).removeClass('active');
 
             // Toggle this container
             if (container.hasClass('collapsed')) {
@@ -85,13 +85,10 @@ async function loadManuscript(manuscriptId) {
             comparisons: data.comparisons || []
         };
 
-        // Populate manuscript overview
-        populateOverview(data.metadata);
+        // Populate manuscript ID badge
+        populateManuscriptHeader(data.metadata);
 
-        // Load and populate authors
-        await loadAuthors(manuscriptId);
-
-        // Populate summary stats
+        // Populate summary stats (compact)
         populateSummaryStats(data.summary_stats);
 
         // Populate claims
@@ -112,8 +109,13 @@ async function loadManuscript(manuscriptId) {
             populateComparisons(data.comparisons);
         }
 
-        // Show manuscript details
-        $('#manuscript-details').show();
+        // Auto-load manuscript if JATS is available
+        if (data.metadata.has_jats) {
+            await loadAndRenderManuscript(manuscriptId);
+        }
+
+        // Show two-column layout
+        $('#paper-layout').show();
 
     } catch (error) {
         $('#loading').hide();
@@ -122,125 +124,9 @@ async function loadManuscript(manuscriptId) {
     }
 }
 
-function populateOverview(metadata) {
-    $('#manuscript-title').text(metadata.title || metadata.id);
-    $('#manuscript-id').text(metadata.id);
-
-    // Set DOI as clickable link
-    if (metadata.doi) {
-        const doiUrl = `https://doi.org/${metadata.doi}`;
-        $('#manuscript-doi').attr('href', doiUrl).text(metadata.doi);
-    } else {
-        $('#manuscript-doi').attr('href', '#').text('N/A').css('pointer-events', 'none');
-    }
-
-    // Display abstract if available
-    if (metadata.abstract) {
-        $('#manuscript-abstract').text(metadata.abstract);
-        $('#manuscript-abstract-container').show();
-    }
-
-    // Display publication date
-    if (metadata.pub_date) {
-        $('#manuscript-pub-date').text(formatDate(metadata.pub_date));
-    } else {
-        $('#manuscript-pub-date').text('Not available');
-    }
-}
-
-async function loadAuthors(manuscriptId) {
-    try {
-        const response = await fetch(`/api/papers/${manuscriptId}/authors`, {
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            console.error('Failed to load authors:', response.statusText);
-            return;
-        }
-
-        const data = await response.json();
-
-        if (data.authors && data.authors.length > 0) {
-            populateAuthors(data.authors);
-            $('#manuscript-authors-container').show();
-        }
-    } catch (error) {
-        console.error('Error loading authors:', error);
-    }
-}
-
-function populateAuthors(authors) {
-    const tbody = $('#manuscript-authors');
-    tbody.empty();
-
-    authors.forEach(author => {
-        const row = $('<tr></tr>');
-
-        // Author name column
-        const authorName = `${author.given_names} ${author.surname}`;
-        const nameCell = $('<td class="author-name-cell"></td>').text(authorName);
-        row.append(nameCell);
-
-        // Affiliation column
-        const affiliationCell = $('<td class="author-affiliation-cell"></td>');
-        if (author.affiliations && author.affiliations.length > 0) {
-            const affiliationParts = author.affiliations.map(aff => {
-                const affParts = [];
-                if (aff.department) affParts.push(aff.department);
-                if (aff.institution) affParts.push(aff.institution);
-                if (aff.city) affParts.push(aff.city);
-                if (aff.country) affParts.push(aff.country);
-                return affParts.length > 0 ? affParts.join(', ') : null;
-            }).filter(aff => aff !== null);
-
-            if (affiliationParts.length > 0) {
-                affiliationCell.text(affiliationParts.join('; '));
-            } else {
-                affiliationCell.text('—');
-            }
-        } else {
-            affiliationCell.text('—');
-        }
-        row.append(affiliationCell);
-
-        // Badges column
-        const badgesCell = $('<td class="author-badges-cell"></td>');
-        const badges = [];
-
-        if (author.orcid) {
-            const orcidLink = $('<a></a>')
-                .attr('href', `https://orcid.org/${author.orcid}`)
-                .attr('target', '_blank')
-                .attr('rel', 'noopener noreferrer')
-                .addClass('orcid-link');
-
-            const orcidBadge = $('<span class="orcid-badge"></span>')
-                .attr('title', `ORCID: ${author.orcid}`)
-                .text('ORCID');
-
-            orcidLink.append(orcidBadge);
-            badges.push(orcidLink);
-        }
-
-        if (author.corresponding) {
-            const corrBadge = $('<span class="corresponding-badge"></span>')
-                .text('Corresponding');
-            badges.push(corrBadge);
-        }
-
-        if (badges.length > 0) {
-            badges.forEach((badge, index) => {
-                if (index > 0) badgesCell.append(' ');
-                badgesCell.append(badge);
-            });
-        } else {
-            badgesCell.text('—');
-        }
-        row.append(badgesCell);
-
-        tbody.append(row);
-    });
+function populateManuscriptHeader(metadata) {
+    // Set manuscript ID badge in left column header
+    $('#manuscript-id-badge').text(metadata.id);
 }
 
 function populateSummaryStats(stats) {
@@ -797,4 +683,51 @@ function formatDate(dateString) {
         month: 'short',
         day: 'numeric'
     });
+}
+
+/**
+ * Load manuscript markdown and render with claim highlighting
+ * Auto-loads on page load (no toggle button)
+ */
+async function loadAndRenderManuscript(manuscriptId) {
+    const $loading = $('#manuscript-loading-left');
+    const $error = $('#manuscript-error-left');
+    const $rendered = $('#manuscript-rendered-left');
+
+    try {
+        $loading.show();
+        $error.hide();
+        $rendered.hide();
+
+        // Fetch markdown from API
+        const response = await fetch(`/api/manuscripts/${manuscriptId}/markdown`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load manuscript: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const markdown = data.markdown;
+
+        // Render markdown to HTML using marked.js
+        const html = marked.parse(markdown);
+        $rendered.html(html);
+
+        // Hide loading, show content
+        $loading.hide();
+        $rendered.show();
+
+        // Apply claim highlighting if claims are available
+        if (window.manuscriptData && window.manuscriptData.claims) {
+            console.log('Applying claim highlighting to manuscript...');
+            ClaimHighlighter.initialize($rendered[0], window.manuscriptData.claims);
+        }
+
+    } catch (error) {
+        console.error('Error loading manuscript:', error);
+        $loading.hide();
+        $error.text(`Error loading manuscript: ${error.message}`).show();
+    }
 }

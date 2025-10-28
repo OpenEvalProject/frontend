@@ -65,6 +65,256 @@ section {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* ============================================================================
+   TWO-COLUMN PAPER LAYOUT
+   ============================================================================ */
+
+/* Override main container for paper page */
+.paper-main-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    height: calc(100vh - 120px); /* Account for header and footer */
+}
+
+/* Two-column grid layout */
+.two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: 100%;
+    background: #f5f5f5;
+}
+
+/* LEFT COLUMN: Manuscript */
+.manuscript-column {
+    background: white;
+    border-right: 2px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.manuscript-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e0e0e0;
+    flex-shrink: 0;
+}
+
+.manuscript-column-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.id-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: #3498db;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.manuscript-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Important for proper flexbox scrolling */
+}
+
+/* Make rendered markdown scrollable, not container */
+.manuscript-scroll-container .rendered-markdown {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    margin-top: 2rem;
+    background: transparent;
+    border: none;
+    max-height: none;
+}
+
+/* Loading and error messages should not scroll */
+.manuscript-scroll-container .loading-message,
+.manuscript-scroll-container .error-message {
+    flex-shrink: 0;
+    margin-top: 2rem;
+}
+
+/* RIGHT COLUMN: Metrics */
+.metrics-column {
+    background: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Right column header - matches left column style */
+.metrics-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e0e0e0;
+    flex-shrink: 0;
+}
+
+.metrics-column-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.metrics-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 2rem 2rem 2rem;
+    min-height: 0; /* Important for proper flexbox scrolling */
+}
+
+/* Compact stats for right column */
+.summary-stats-compact {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+}
+
+.stats-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card-compact {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.stat-card-compact.clickable {
+    cursor: pointer;
+}
+
+.stat-card-compact.clickable:hover {
+    background: #e9ecef;
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stat-card-compact.clickable.active {
+    background: #d6eaf8;
+    border-color: #3498db;
+    border-width: 3px;
+}
+
+.stat-card-compact .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-card-compact .stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* Mini badges for compact stats */
+.stat-breakdown-mini {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.mini-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.mini-badge.status-supported {
+    background: #d4edda;
+    color: #155724;
+}
+
+.mini-badge.status-unsupported {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.mini-badge.status-uncertain {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Scrollbar styling for both columns */
+.manuscript-scroll-container::-webkit-scrollbar,
+.metrics-scroll-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.manuscript-scroll-container::-webkit-scrollbar-track,
+.metrics-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.manuscript-scroll-container::-webkit-scrollbar-thumb,
+.metrics-scroll-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+.manuscript-scroll-container::-webkit-scrollbar-thumb:hover,
+.metrics-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Adjustments for tables in narrower right column */
+.metrics-column .results-table,
+.metrics-column .claims-list-table,
+.metrics-column .comparison-table {
+    width: 100%;
+    margin: 0 0 2rem 0;
+}
+
+.metrics-column .collapsible-content.expanded {
+    max-height: 500px;
+}
+
+/* Comparison section in compact layout */
+.comparison-section-compact {
+    margin-top: 2rem;
+}
+
+.comparison-section-compact h3 {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
 /* Papers table */
 .papers-table {
     overflow-x: auto;
@@ -2514,4 +2764,482 @@ table.dataTable.display tbody tr.even:hover {
     border-radius: 3px;
     font-size: 0.75rem;
     font-weight: 600;
+}
+
+/* ============================================================================
+   MANUSCRIPT VIEWER SECTION
+   ============================================================================ */
+
+#manuscript-viewer-section {
+    margin: 2rem 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.manuscript-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.manuscript-viewer-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.toggle-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.manuscript-content {
+    margin-top: 1rem;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.error-message {
+    background: #ffe6e6;
+    border-left: 4px solid #e74c3c;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+    color: #c0392b;
+}
+
+.rendered-markdown {
+    padding: 2rem;
+    background: #fafafa;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+/* Markdown content styling */
+.rendered-markdown h1 {
+    font-size: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.rendered-markdown h2 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #34495e;
+}
+
+.rendered-markdown h3 {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+}
+
+.rendered-markdown p {
+    margin: 1rem 0;
+    line-height: 1.7;
+    color: #333;
+}
+
+.rendered-markdown ul,
+.rendered-markdown ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.rendered-markdown li {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.rendered-markdown code {
+    background: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.rendered-markdown pre {
+    background: #f4f4f4;
+    padding: 1rem;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.rendered-markdown blockquote {
+    border-left: 4px solid #3498db;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #555;
+    font-style: italic;
+}
+
+.rendered-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.rendered-markdown th,
+.rendered-markdown td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.rendered-markdown th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.rendered-markdown img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    border-radius: 4px;
+    display: block;
+}
+
+/* Figure captions */
+.rendered-markdown p > img:only-child {
+    margin: 1.5rem auto;
+}
+
+/* Ensure images load and display */
+.rendered-markdown img[src] {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+}
+
+.rendered-markdown img:not([src]),
+.rendered-markdown img[src=""] {
+    display: none;
+}
+
+/* ============================================================================
+   CLAIM HIGHLIGHTING
+   ============================================================================ */
+
+.claim-highlight {
+    background-color: #fff3cd;
+    border-bottom: 2px solid #ffc107;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.claim-highlight:hover {
+    background-color: #ffeb9c;
+    border-bottom-color: #ff9800;
+}
+
+/* Different colors for claim types */
+.claim-highlight[data-claim-type="EXPLICIT"] {
+    background-color: #d4edda;
+    border-bottom-color: #28a745;
+}
+
+.claim-highlight[data-claim-type="EXPLICIT"]:hover {
+    background-color: #b8dac4;
+}
+
+.claim-highlight[data-claim-type="IMPLICIT"] {
+    background-color: #d1ecf1;
+    border-bottom-color: #17a2b8;
+}
+
+.claim-highlight[data-claim-type="IMPLICIT"]:hover {
+    background-color: #b5dce3;
+}
+
+/* ============================================================================
+   CLAIM TOOLTIP
+   ============================================================================ */
+
+.claim-tooltip {
+    position: fixed;
+    z-index: 1000;
+    background: white;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    min-width: 300px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #3498db;
+    color: white;
+    border-radius: 6px 6px 0 0;
+}
+
+.tooltip-claim-type {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.tooltip-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tooltip-body {
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tooltip-section {
+    margin-bottom: 1rem;
+}
+
+.tooltip-section:last-child {
+    margin-bottom: 0;
+}
+
+.tooltip-section strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tooltip-section p {
+    margin: 0;
+    color: #333;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.tooltip-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.evidence-badge,
+.source-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Evidence type specific colors */
+.evidence-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+}
+
+.evidence-badge-DATA {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #64b5f6;
+}
+
+.evidence-badge-CITATION {
+    background: #f3e5f5;
+    color: #7b1fa2;
+    border: 1px solid #ba68c8;
+}
+
+.evidence-badge-KNOWLEDGE {
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffb74d;
+}
+
+.evidence-badge-INFERENCE {
+    background: #fce4ec;
+    color: #c2185b;
+    border: 1px solid #f48fb1;
+}
+
+.evidence-badge-SPECULATION {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef5350;
+}
+
+/* Source type colors */
+.source-badge {
+    background: #e0f2f1;
+    color: #00695c;
+    border: 1px solid #4db6ac;
+}
+
+.source-badge-TEXT {
+    background: #e0f2f1;
+    color: #00695c;
+    border: 1px solid #4db6ac;
+}
+
+.source-badge-IMAGE {
+    background: #ede7f6;
+    color: #4527a0;
+    border: 1px solid #9575cd;
+}
+
+/* Scrollbar styling for tooltip */
+.tooltip-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tooltip-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.tooltip-body::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 3px;
+}
+
+.tooltip-body::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN FOR TWO-COLUMN LAYOUT
+   ============================================================================ */
+
+/* Tablet: Stack columns vertically */
+@media (max-width: 1024px) {
+    .two-column-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+    }
+
+    .manuscript-column {
+        border-right: none;
+        border-bottom: 2px solid #e0e0e0;
+        height: auto;
+        max-height: 60vh;
+    }
+
+    .metrics-column {
+        height: auto;
+    }
+
+    .paper-main-container {
+        height: auto;
+        min-height: calc(100vh - 120px);
+    }
+}
+
+/* Mobile: Further optimize for small screens */
+@media (max-width: 768px) {
+    .manuscript-column-header,
+    .metrics-column-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .manuscript-column-header h2,
+    .metrics-column-header h2 {
+        font-size: 1rem;
+    }
+
+    .id-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .manuscript-scroll-container,
+    .metrics-scroll-container {
+        padding: 1rem;
+    }
+
+    .stats-grid-compact {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .stat-card-compact {
+        padding: 0.75rem;
+    }
+
+    .stat-card-compact .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-card-compact .stat-label {
+        font-size: 0.75rem;
+    }
+
+    /* Adjust manuscript max height on mobile */
+    .manuscript-column {
+        max-height: 50vh;
+    }
 }
