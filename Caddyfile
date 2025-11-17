@@ -1,0 +1,27 @@
+dev.local.claim-verification.com {
+    # Use local TLS
+    tls internal
+
+    # Enable CORS for API requests
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers *
+    }
+
+    # Handle API requests explicitly first (mutually exclusive with file_server)
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle /auth/* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    # Handle everything else as static files
+    handle {
+        root * .
+        try_files {path} {path}/ /index.html
+        file_server
+    }
+}
