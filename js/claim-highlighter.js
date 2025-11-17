@@ -60,7 +60,8 @@ const ClaimHighlighter = (function() {
      * @param {Object} claim - Claim object with source text
      */
     function highlightClaim(container, claim) {
-        const sourceText = claim.source;
+        // Prefer matched_segment (precise JATS position) over source (fuzzy match)
+        const sourceText = claim.matched_segment || claim.source;
         if (!sourceText || sourceText.trim().length === 0) {
             return;
         }
