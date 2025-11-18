@@ -174,35 +174,14 @@ function populateSummaryText(claims, results_llm, results_peer, comparisons) {
             (llmClaimCounts[llmClaimCounts.length / 2 - 1] + llmClaimCounts[llmClaimCounts.length / 2]) / 2 :
             llmClaimCounts[Math.floor(llmClaimCounts.length / 2)]) : 0;
 
-    // Count minor vs major for LLM
-    const llmMinor = results_llm.filter(r => r.result_type === 'minor').length;
-    const llmMajor = results_llm.filter(r => r.result_type === 'major').length;
-
     // Build first paragraph about LLM
     summaryHtml += `<p>This paper contained ${totalClaims} claims. OpenEval computed ${totalLLM} results, with a median of ${medianLLM.toFixed(1)} claims per result. `;
 
-    // Show type breakdown and major result status if we have type information
-    if (llmMinor > 0 || llmMajor > 0) {
-        summaryHtml += `Of those ${totalLLM} results, ${llmMinor} were minor and ${llmMajor} were major. `;
-
-        // Show status for major results only
-        if (llmMajor > 0) {
-            const llmMajorResults = results_llm.filter(r => r.result_type === 'major');
-            const llmMajorSupported = llmMajorResults.filter(r => r.result_status === 'supported').length;
-            const llmMajorUnsupported = llmMajorResults.filter(r => r.result_status === 'unsupported').length;
-            const llmMajorUncertain = llmMajorResults.filter(r => r.result_status === 'uncertain').length;
-
-            const llmMajorSupportedPct = ((llmMajorSupported / llmMajor) * 100).toFixed(0);
-            const llmMajorUnsupportedPct = ((llmMajorUnsupported / llmMajor) * 100).toFixed(0);
-            const llmMajorUncertainPct = ((llmMajorUncertain / llmMajor) * 100).toFixed(0);
-
-            summaryHtml += `The ${llmMajor} major results were ${llmMajorSupportedPct}% supported, ${llmMajorUnsupportedPct}% unsupported, and ${llmMajorUncertainPct}% uncertain.`;
-        }
-    } else if (totalLLM > 0) {
-        // If no type information, show status for all results
-        const llmSupported = results_llm.filter(r => r.result_status === 'supported').length;
-        const llmUnsupported = results_llm.filter(r => r.result_status === 'unsupported').length;
-        const llmUncertain = results_llm.filter(r => r.result_status === 'uncertain').length;
+    // Show status for all results (using UPPERCASE to match database values)
+    if (totalLLM > 0) {
+        const llmSupported = results_llm.filter(r => r.result_status === 'SUPPORTED').length;
+        const llmUnsupported = results_llm.filter(r => r.result_status === 'UNSUPPORTED').length;
+        const llmUncertain = results_llm.filter(r => r.result_status === 'UNCERTAIN').length;
 
         const llmSupportedPct = ((llmSupported / totalLLM) * 100).toFixed(0);
         const llmUnsupportedPct = ((llmUnsupported / totalLLM) * 100).toFixed(0);
@@ -220,40 +199,18 @@ function populateSummaryText(claims, results_llm, results_peer, comparisons) {
                 (peerClaimCounts[peerClaimCounts.length / 2 - 1] + peerClaimCounts[peerClaimCounts.length / 2]) / 2 :
                 peerClaimCounts[Math.floor(peerClaimCounts.length / 2)]) : 0;
 
-        const peerMinor = results_peer.filter(r => r.result_type === 'minor').length;
-        const peerMajor = results_peer.filter(r => r.result_type === 'major').length;
-
         summaryHtml += `<p>Peer reviewers computed ${totalPeer} results, with a median of ${medianPeer.toFixed(1)} claims per result. `;
 
-        // Show type breakdown and major result status if we have type information
-        if (peerMinor > 0 || peerMajor > 0) {
-            summaryHtml += `Of those ${totalPeer} results, ${peerMinor} were minor and ${peerMajor} were major. `;
+        // Show status for all results (using UPPERCASE to match database values)
+        const peerSupported = results_peer.filter(r => r.result_status === 'SUPPORTED').length;
+        const peerUnsupported = results_peer.filter(r => r.result_status === 'UNSUPPORTED').length;
+        const peerUncertain = results_peer.filter(r => r.result_status === 'UNCERTAIN').length;
 
-            // Show status for major results only
-            if (peerMajor > 0) {
-                const peerMajorResults = results_peer.filter(r => r.result_type === 'major');
-                const peerMajorSupported = peerMajorResults.filter(r => r.result_status === 'supported').length;
-                const peerMajorUnsupported = peerMajorResults.filter(r => r.result_status === 'unsupported').length;
-                const peerMajorUncertain = peerMajorResults.filter(r => r.result_status === 'uncertain').length;
+        const peerSupportedPct = ((peerSupported / totalPeer) * 100).toFixed(0);
+        const peerUnsupportedPct = ((peerUnsupported / totalPeer) * 100).toFixed(0);
+        const peerUncertainPct = ((peerUncertain / totalPeer) * 100).toFixed(0);
 
-                const peerMajorSupportedPct = ((peerMajorSupported / peerMajor) * 100).toFixed(0);
-                const peerMajorUnsupportedPct = ((peerMajorUnsupported / peerMajor) * 100).toFixed(0);
-                const peerMajorUncertainPct = ((peerMajorUncertain / peerMajor) * 100).toFixed(0);
-
-                summaryHtml += `The ${peerMajor} major results were ${peerMajorSupportedPct}% supported, ${peerMajorUnsupportedPct}% unsupported, and ${peerMajorUncertainPct}% uncertain.`;
-            }
-        } else if (totalPeer > 0) {
-            // If no type information, show status for all results
-            const peerSupported = results_peer.filter(r => r.result_status === 'supported').length;
-            const peerUnsupported = results_peer.filter(r => r.result_status === 'unsupported').length;
-            const peerUncertain = results_peer.filter(r => r.result_status === 'uncertain').length;
-
-            const peerSupportedPct = ((peerSupported / totalPeer) * 100).toFixed(0);
-            const peerUnsupportedPct = ((peerUnsupported / totalPeer) * 100).toFixed(0);
-            const peerUncertainPct = ((peerUncertain / totalPeer) * 100).toFixed(0);
-
-            summaryHtml += `Of the ${totalPeer} results, ${peerSupportedPct}% were supported, ${peerUnsupportedPct}% were unsupported, and ${peerUncertainPct}% were uncertain.`;
-        }
+        summaryHtml += `Of the ${totalPeer} results, ${peerSupportedPct}% were supported, ${peerUnsupportedPct}% were unsupported, and ${peerUncertainPct}% were uncertain.`;
         summaryHtml += `</p>`;
 
         // Add agreement stats if comparisons exist
