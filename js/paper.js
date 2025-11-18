@@ -260,7 +260,7 @@ function populateSummaryText(claims, results_llm, results_peer, comparisons) {
         // Add agreement stats if comparisons exist
         if (comparisons.length > 0) {
             const agreed = comparisons.filter(c => c.agreement_status === 'agree').length;
-            const partiallyAgreed = comparisons.filter(c => c.agreement_status === 'partially_agree').length;
+            const partiallyAgreed = comparisons.filter(c => c.agreement_status === 'partial').length;
             const disagreed = comparisons.filter(c => c.agreement_status === 'disagree').length;
             const disjoint = comparisons.filter(c => c.agreement_status === 'disjoint').length;
 
