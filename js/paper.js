@@ -265,11 +265,12 @@ function populateSummaryText(claims, results_llm, results_peer, comparisons) {
             const disjoint = comparisons.filter(c => c.agreement_status === 'disjoint').length;
 
             const totalComparisons = comparisons.length;
+            const agreePct = ((agreed / totalComparisons) * 100).toFixed(0);
             const partialPct = ((partiallyAgreed / totalComparisons) * 100).toFixed(0);
             const disagreePct = ((disagreed / totalComparisons) * 100).toFixed(0);
             const disjointPct = ((disjoint / totalComparisons) * 100).toFixed(0);
 
-            summaryHtml += `<p>OpenEval and peer reviewers agreed on ${agreed} results, partially agreed on ${partiallyAgreed} (${partialPct}%) results, and disagreed on ${disagreed} (${disagreePct}%) results. ${disjoint} (${disjointPct}%) results were disjoint.</p>`;
+            summaryHtml += `<p>OpenEval and peer reviewers agreed on ${agreed} (${agreePct}%) results, partially agreed on ${partiallyAgreed} (${partialPct}%) results, and disagreed on ${disagreed} (${disagreePct}%) results. ${disjoint} (${disjointPct}%) results were disjoint.</p>`;
         }
     }
 
