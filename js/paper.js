@@ -19,35 +19,17 @@ $(document).ready(async function() {
         const target = $(this).data('target');
         const container = $(`#${target}`);
 
-        // Special handling for comparison section (doesn't use collapsible-content class)
-        if (target === 'comparison-section') {
-            // Close all collapsible containers
-            $('.collapsible-content').removeClass('expanded').addClass('collapsed');
-            $('.stat-card-compact.clickable, .stat-card.clickable').not(this).removeClass('active');
+        // Close all other containers
+        $('.collapsible-content').not(container).removeClass('expanded').addClass('collapsed');
+        $('.stat-card-compact.clickable, .stat-card.clickable').not(this).removeClass('active');
 
-            // Toggle comparison section
-            if (container.is(':visible')) {
-                container.hide();
-                $(this).removeClass('active');
-            } else {
-                container.show();
-                $(this).addClass('active');
-            }
+        // Toggle this container
+        if (container.hasClass('collapsed')) {
+            container.removeClass('collapsed').addClass('expanded');
+            $(this).addClass('active');
         } else {
-            // Normal handling for collapsible-content containers
-            // Close all other containers and comparison section
-            $('.collapsible-content').not(container).removeClass('expanded').addClass('collapsed');
-            $('#comparison-section').hide();
-            $('.stat-card-compact.clickable, .stat-card.clickable').not(this).removeClass('active');
-
-            // Toggle this container
-            if (container.hasClass('collapsed')) {
-                container.removeClass('collapsed').addClass('expanded');
-                $(this).addClass('active');
-            } else {
-                container.removeClass('expanded').addClass('collapsed');
-                $(this).removeClass('active');
-            }
+            container.removeClass('expanded').addClass('collapsed');
+            $(this).removeClass('active');
         }
     });
 });
@@ -90,6 +72,9 @@ async function loadManuscript(manuscriptId) {
 
         // Populate summary stats (compact)
         populateSummaryStats(data.summary_stats);
+
+        // Populate summary text
+        populateSummaryText(data.claims, data.results_llm, data.results_peer, data.comparisons || []);
 
         // Populate claims
         populateClaims(data.claims);
@@ -165,6 +150,131 @@ function populateSummaryStats(stats) {
     }
 }
 
+function populateSummaryText(claims, results_llm, results_peer, comparisons) {
+    const summaryContainer = $('#summary-text');
+    let summaryHtml = '';
+
+    // Calculate statistics
+    const totalClaims = claims.length;
+    const totalLLM = results_llm.length;
+    const totalPeer = results_peer.length;
+
+    // Debug: log a sample result to see the actual structure
+    if (results_llm.length > 0) {
+        console.log('Sample LLM result:', results_llm[0]);
+    }
+    if (results_peer.length > 0) {
+        console.log('Sample Peer result:', results_peer[0]);
+    }
+
+    // Calculate median claims per result for LLM
+    const llmClaimCounts = results_llm.map(r => r.claim_ids ? r.claim_ids.length : 0).sort((a, b) => a - b);
+    const medianLLM = llmClaimCounts.length > 0 ?
+        (llmClaimCounts.length % 2 === 0 ?
+            (llmClaimCounts[llmClaimCounts.length / 2 - 1] + llmClaimCounts[llmClaimCounts.length / 2]) / 2 :
+            llmClaimCounts[Math.floor(llmClaimCounts.length / 2)]) : 0;
+
+    // Count minor vs major for LLM
+    const llmMinor = results_llm.filter(r => r.result_type === 'minor').length;
+    const llmMajor = results_llm.filter(r => r.result_type === 'major').length;
+
+    // Build first paragraph about LLM
+    summaryHtml += `<p>This paper contained ${totalClaims} claims. OpenEval computed ${totalLLM} results, with a median of ${medianLLM.toFixed(1)} claims per result. `;
+
+    // Show type breakdown and major result status if we have type information
+    if (llmMinor > 0 || llmMajor > 0) {
+        summaryHtml += `Of those ${totalLLM} results, ${llmMinor} were minor and ${llmMajor} were major. `;
+
+        // Show status for major results only
+        if (llmMajor > 0) {
+            const llmMajorResults = results_llm.filter(r => r.result_type === 'major');
+            const llmMajorSupported = llmMajorResults.filter(r => r.result_status === 'supported').length;
+            const llmMajorUnsupported = llmMajorResults.filter(r => r.result_status === 'unsupported').length;
+            const llmMajorUncertain = llmMajorResults.filter(r => r.result_status === 'uncertain').length;
+
+            const llmMajorSupportedPct = ((llmMajorSupported / llmMajor) * 100).toFixed(0);
+            const llmMajorUnsupportedPct = ((llmMajorUnsupported / llmMajor) * 100).toFixed(0);
+            const llmMajorUncertainPct = ((llmMajorUncertain / llmMajor) * 100).toFixed(0);
+
+            summaryHtml += `The ${llmMajor} major results were ${llmMajorSupportedPct}% supported, ${llmMajorUnsupportedPct}% unsupported, and ${llmMajorUncertainPct}% uncertain.`;
+        }
+    } else if (totalLLM > 0) {
+        // If no type information, show status for all results
+        const llmSupported = results_llm.filter(r => r.result_status === 'supported').length;
+        const llmUnsupported = results_llm.filter(r => r.result_status === 'unsupported').length;
+        const llmUncertain = results_llm.filter(r => r.result_status === 'uncertain').length;
+
+        const llmSupportedPct = ((llmSupported / totalLLM) * 100).toFixed(0);
+        const llmUnsupportedPct = ((llmUnsupported / totalLLM) * 100).toFixed(0);
+        const llmUncertainPct = ((llmUncertain / totalLLM) * 100).toFixed(0);
+
+        summaryHtml += `Of the ${totalLLM} results, ${llmSupportedPct}% were supported, ${llmUnsupportedPct}% were unsupported, and ${llmUncertainPct}% were uncertain.`;
+    }
+    summaryHtml += `</p>`;
+
+    // Add peer reviewer stats if they exist
+    if (totalPeer > 0) {
+        const peerClaimCounts = results_peer.map(r => r.claim_ids ? r.claim_ids.length : 0).sort((a, b) => a - b);
+        const medianPeer = peerClaimCounts.length > 0 ?
+            (peerClaimCounts.length % 2 === 0 ?
+                (peerClaimCounts[peerClaimCounts.length / 2 - 1] + peerClaimCounts[peerClaimCounts.length / 2]) / 2 :
+                peerClaimCounts[Math.floor(peerClaimCounts.length / 2)]) : 0;
+
+        const peerMinor = results_peer.filter(r => r.result_type === 'minor').length;
+        const peerMajor = results_peer.filter(r => r.result_type === 'major').length;
+
+        summaryHtml += `<p>Peer reviewers computed ${totalPeer} results, with a median of ${medianPeer.toFixed(1)} claims per result. `;
+
+        // Show type breakdown and major result status if we have type information
+        if (peerMinor > 0 || peerMajor > 0) {
+            summaryHtml += `Of those ${totalPeer} results, ${peerMinor} were minor and ${peerMajor} were major. `;
+
+            // Show status for major results only
+            if (peerMajor > 0) {
+                const peerMajorResults = results_peer.filter(r => r.result_type === 'major');
+                const peerMajorSupported = peerMajorResults.filter(r => r.result_status === 'supported').length;
+                const peerMajorUnsupported = peerMajorResults.filter(r => r.result_status === 'unsupported').length;
+                const peerMajorUncertain = peerMajorResults.filter(r => r.result_status === 'uncertain').length;
+
+                const peerMajorSupportedPct = ((peerMajorSupported / peerMajor) * 100).toFixed(0);
+                const peerMajorUnsupportedPct = ((peerMajorUnsupported / peerMajor) * 100).toFixed(0);
+                const peerMajorUncertainPct = ((peerMajorUncertain / peerMajor) * 100).toFixed(0);
+
+                summaryHtml += `The ${peerMajor} major results were ${peerMajorSupportedPct}% supported, ${peerMajorUnsupportedPct}% unsupported, and ${peerMajorUncertainPct}% uncertain.`;
+            }
+        } else if (totalPeer > 0) {
+            // If no type information, show status for all results
+            const peerSupported = results_peer.filter(r => r.result_status === 'supported').length;
+            const peerUnsupported = results_peer.filter(r => r.result_status === 'unsupported').length;
+            const peerUncertain = results_peer.filter(r => r.result_status === 'uncertain').length;
+
+            const peerSupportedPct = ((peerSupported / totalPeer) * 100).toFixed(0);
+            const peerUnsupportedPct = ((peerUnsupported / totalPeer) * 100).toFixed(0);
+            const peerUncertainPct = ((peerUncertain / totalPeer) * 100).toFixed(0);
+
+            summaryHtml += `Of the ${totalPeer} results, ${peerSupportedPct}% were supported, ${peerUnsupportedPct}% were unsupported, and ${peerUncertainPct}% were uncertain.`;
+        }
+        summaryHtml += `</p>`;
+
+        // Add agreement stats if comparisons exist
+        if (comparisons.length > 0) {
+            const agreed = comparisons.filter(c => c.agreement_status === 'agree').length;
+            const partiallyAgreed = comparisons.filter(c => c.agreement_status === 'partially_agree').length;
+            const disagreed = comparisons.filter(c => c.agreement_status === 'disagree').length;
+            const disjoint = comparisons.filter(c => c.agreement_status === 'disjoint').length;
+
+            const totalComparisons = comparisons.length;
+            const partialPct = ((partiallyAgreed / totalComparisons) * 100).toFixed(0);
+            const disagreePct = ((disagreed / totalComparisons) * 100).toFixed(0);
+            const disjointPct = ((disjoint / totalComparisons) * 100).toFixed(0);
+
+            summaryHtml += `<p>OpenEval and peer reviewers agreed on ${agreed} results, partially agreed on ${partiallyAgreed} (${partialPct}%) results, and disagreed on ${disagreed} (${disagreePct}%) results. ${disjoint} (${disjointPct}%) results were disjoint.</p>`;
+        }
+    }
+
+    summaryContainer.html(summaryHtml);
+}
+
 function populateClaims(claims) {
     const container = $('#claims-container');
     container.empty();
@@ -199,7 +309,7 @@ function populateClaims(claims) {
         return [displayId, typeBadge, claimText, evidenceBadges];
     });
 
-    // Initialize DataTable
+    // Initialize DataTable with simplified configuration
     claimsTable = $('#claims-table').DataTable({
         data: tableData,
         columns: [
@@ -208,16 +318,12 @@ function populateClaims(claims) {
             { title: 'Claim', width: '55%' },
             { title: 'Evidence Type', width: '20%' }
         ],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
+        paging: false,
+        searching: true,
+        info: false,
+        lengthChange: false,
         order: [[0, 'asc']],
-        language: {
-            search: 'Search claims:',
-            lengthMenu: 'Show _MENU_ claims',
-            info: 'Showing _START_ to _END_ of _TOTAL_ claims',
-            infoEmpty: 'No claims available',
-            infoFiltered: '(filtered from _MAX_ total claims)'
-        }
+        dom: 'frtip'
     });
 
     // Add click handler for expandable rows using DataTables child rows API
@@ -315,7 +421,7 @@ function populateResultsLLM(results) {
         return [resultId, resultText, statusBadge, typeBadges, claimCount, reasoning];
     });
 
-    // Initialize DataTable
+    // Initialize DataTable with simplified configuration
     llmResultsTable = $('#llm-results-table').DataTable({
         data: tableData,
         columns: [
@@ -326,14 +432,12 @@ function populateResultsLLM(results) {
             { title: '# Claims', width: '7%' },
             { title: 'Reasoning', width: '43%' }
         ],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50],
+        paging: false,
+        searching: true,
+        info: false,
+        lengthChange: false,
         order: [[0, 'asc']],
-        language: {
-            search: 'Search results:',
-            lengthMenu: 'Show _MENU_ results',
-            info: 'Showing _START_ to _END_ of _TOTAL_ results'
-        }
+        dom: 'frtip'
     });
 
     // Add click handler for expandable rows
@@ -451,7 +555,7 @@ function populateResultsPeer(results) {
         return [resultId, resultText, statusBadge, typeBadges, claimCount, reasoning];
     });
 
-    // Initialize DataTable
+    // Initialize DataTable with simplified configuration
     peerResultsTable = $('#peer-results-table').DataTable({
         data: tableData,
         columns: [
@@ -462,14 +566,12 @@ function populateResultsPeer(results) {
             { title: '# Claims', width: '7%' },
             { title: 'Reasoning', width: '43%' }
         ],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50],
+        paging: false,
+        searching: true,
+        info: false,
+        lengthChange: false,
         order: [[0, 'asc']],
-        language: {
-            search: 'Search results:',
-            lengthMenu: 'Show _MENU_ results',
-            info: 'Showing _START_ to _END_ of _TOTAL_ results'
-        }
+        dom: 'frtip'
     });
 
     // Add click handler for expandable rows
@@ -498,16 +600,15 @@ function populateResultsPeer(results) {
 }
 
 function populateComparisons(comparisons) {
-    const tbody = $('#comparison-table-body');
-    const section = $('#comparison-section');
-    tbody.empty();
+    const container = $('#comparison-section');
+    container.empty();
 
     if (comparisons.length === 0) {
         return;
     }
 
-    // Clear existing table and create new one
-    $('#comparison-section .comparison-container').html('<table id="comparisons-table" class="display comparison-table" style="width:100%"></table>');
+    // Create table structure
+    container.html('<table id="comparisons-table" class="display comparison-table" style="width:100%"></table>');
 
     // Prepare data for DataTables
     const tableData = comparisons.map(comp => {
@@ -528,7 +629,7 @@ function populateComparisons(comparisons) {
         return [openevalStatusBadge, openevalTypeBadge, peerStatusBadge, peerTypeBadge, agreementBadge, comparison];
     });
 
-    // Initialize DataTable
+    // Initialize DataTable with simplified configuration
     comparisonsTable = $('#comparisons-table').DataTable({
         data: tableData,
         columns: [
@@ -539,14 +640,12 @@ function populateComparisons(comparisons) {
             { title: 'Agreement', width: '15%' },
             { title: 'Comparison', width: '31%' }
         ],
-        pageLength: 10,
-        lengthMenu: [10, 25, 50],
+        paging: false,
+        searching: true,
+        info: false,
+        lengthChange: false,
         order: [[2, 'asc']],
-        language: {
-            search: 'Search comparisons:',
-            lengthMenu: 'Show _MENU_ comparisons',
-            info: 'Showing _START_ to _END_ of _TOTAL_ comparisons'
-        }
+        dom: 'frtip'
     });
 
     // Add click handler for expandable rows

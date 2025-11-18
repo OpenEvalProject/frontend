@@ -214,10 +214,32 @@ section {
     flex-direction: column;
 }
 
+/* Summary text section */
+.summary-text {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid #3498db;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #495057;
+    flex-shrink: 0;
+}
+
+.summary-text p {
+    margin: 0 0 0.75rem 0;
+}
+
+.summary-text p:last-child {
+    margin-bottom: 0;
+}
+
 /* Compact stats for right column */
 .summary-stats-compact {
-    margin-bottom: 2rem;
-    margin-top: 2rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
     flex-shrink: 0;
 }
 
@@ -324,25 +346,35 @@ section {
 .metrics-column .claims-list-table,
 .metrics-column .comparison-table {
     width: 100%;
-    margin: 0 0 2rem 0;
+    margin: 0;
 }
 
 .metrics-column .collapsible-content.expanded {
     /* Allow content to fill available space - removed max-height constraint */
 }
 
-/* Comparison section in compact layout */
-.comparison-section-compact {
-    margin-top: 2rem;
+/* DataTables wrapper customization for cleaner look */
+.metrics-column .dataTables_wrapper {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.comparison-section-compact h3 {
-    font-size: 1.25rem;
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e0e0e0;
+.metrics-column .dataTables_wrapper .dataTables_filter {
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
 }
+
+.metrics-column .dataTables_wrapper .dataTables_filter input {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
 
 /* Papers table */
 .papers-table {
@@ -1234,16 +1266,16 @@ footer {
 .collapsible-section {
     background: transparent;
     padding: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    flex-shrink: 0;
 }
 
 .collapsible-section:has(.collapsible-content.expanded) {
     flex: 1;
-    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* Claims section */
@@ -1397,35 +1429,28 @@ footer {
 }
 
 /* Comparison table */
-.comparison-container {
-    max-height: 600px;
-    overflow: auto;
-}
-
 .comparison-table {
     width: 100%;
+    margin: 0;
     border-collapse: collapse;
     background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 0.85rem;
+    border: 1px solid #dee2e6;
 }
 
 .comparison-table th {
-    background: #2c3e50;
-    color: white;
-    padding: 1rem;
+    background: #f8f9fa;
+    color: #2c3e50;
+    padding: 0.6rem 0.8rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.9rem;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #dee2e6;
 }
 
 .comparison-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .comparison-table tr:last-child td {
@@ -1693,13 +1718,15 @@ footer {
 .collapsible-content.expanded {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     opacity: 1;
     padding: 0;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-top: 1rem;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 0.25rem;
 }
 
 /* Scrollbar styling for collapsed content */
@@ -1723,30 +1750,27 @@ footer {
 
 /* Results tables (LLM and Peer) */
 .results-table {
-    width: calc(100% - 4rem);
-    margin: 2rem;
+    width: 100%;
+    margin: 0;
     border-collapse: collapse;
     background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 0.85rem;
+    border: 1px solid #dee2e6;
 }
 
 .results-table th {
-    background: #2c3e50;
-    color: white;
-    padding: 1rem;
+    background: #f8f9fa;
+    color: #2c3e50;
+    padding: 0.6rem 0.8rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.9rem;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #dee2e6;
 }
 
 .results-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .results-table tr:last-child td {
@@ -1799,30 +1823,27 @@ footer {
 
 /* Claims list table */
 .claims-list-table {
-    width: calc(100% - 4rem);
-    margin: 2rem;
+    width: 100%;
+    margin: 0;
     border-collapse: collapse;
     background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 0.85rem;
+    border: 1px solid #dee2e6;
 }
 
 .claims-list-table th {
-    background: #2c3e50;
-    color: white;
-    padding: 1rem;
+    background: #f8f9fa;
+    color: #2c3e50;
+    padding: 0.6rem 0.8rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.9rem;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #dee2e6;
 }
 
 .claims-list-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .claims-list-table tr:last-child td {
@@ -2985,6 +3006,12 @@ table.dataTable.display tbody tr.even:hover {
 /* ============================================================================
    CLAIM HIGHLIGHTING
    ============================================================================ */
+
+/* Reset mark element styling for claim highlights */
+mark.claim-highlight {
+    background-color: transparent;
+    color: inherit;
+}
 
 .claim-highlight {
     background-color: #fff3cd;

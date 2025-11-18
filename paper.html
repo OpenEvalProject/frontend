@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manuscript Analysis - OpenEval Project</title>
-    <link rel="stylesheet" href="/css/styles.css?v=17" />
+    <link rel="stylesheet" href="/css/styles.css?v=18" />
     <!-- DataTables CSS -->
     <link
       rel="stylesheet"
@@ -63,6 +63,11 @@
           </div>
 
           <div class="metrics-scroll-container">
+            <!-- Summary Text -->
+            <div class="summary-text" id="summary-text">
+              <!-- Populated by JavaScript -->
+            </div>
+
             <!-- Summary Statistics Cards -->
             <div class="summary-stats-compact">
               <div class="stats-grid-compact">
@@ -159,25 +164,12 @@
             </div>
 
             <!-- Comparison Section -->
-            <div
-              id="comparison-section"
-              class="comparison-section-compact"
-              style="display: none"
-            >
-              <div class="comparison-container">
-                <table class="comparison-table">
-                  <thead>
-                    <tr>
-                      <th>OpenEval Status</th>
-                      <th>Peer Status</th>
-                      <th>Agreement</th>
-                      <th>Comparison</th>
-                    </tr>
-                  </thead>
-                  <tbody id="comparison-table-body">
-                    <!-- Comparison rows populated by JavaScript -->
-                  </tbody>
-                </table>
+            <div class="collapsible-section">
+              <div
+                id="comparison-section"
+                class="collapsible-content collapsed"
+              >
+                <!-- Comparison table populated by JavaScript -->
               </div>
             </div>
           </div>
@@ -189,7 +181,7 @@
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="/js/common.js?v=17"></script>
-    <script src="/js/claim-highlighter.js?v=1"></script>
+    <script src="/js/claim-highlighter.js?v=2"></script>
     <script src="/js/paper.js?v=17"></script>
   </body>
 </html>

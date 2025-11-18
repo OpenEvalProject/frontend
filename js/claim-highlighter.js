@@ -327,6 +327,60 @@ const ClaimHighlighter = (function() {
     }
 
     /**
+     * Enhance pre-existing <mark> tags with claim metadata and interactions
+     * @param {HTMLElement} container - Container with manuscript content
+     * @param {Array} claims - Array of claim objects
+     */
+    function enhanceExistingMarks(container, claims) {
+        // Find all <mark> tags with data-claim-id
+        const marks = container.querySelectorAll('mark[data-claim-id]');
+
+        if (marks.length === 0) {
+            console.log('[Claim Highlighting] No pre-highlighted claims found in markdown');
+            return 0;
+        }
+
+        console.log(`[Claim Highlighting] Found ${marks.length} pre-highlighted claims`);
+
+        // Create claim lookup by ID
+        const claimById = {};
+        claims.forEach(claim => {
+            claimById[claim.claim_id] = claim;
+        });
+
+        // Enhance each mark with claim metadata
+        let enhanced = 0;
+        marks.forEach(mark => {
+            const claimId = mark.getAttribute('data-claim-id');
+            const claim = claimById[claimId];
+
+            if (claim) {
+                // Add claim-highlight class for styling
+                mark.classList.add('claim-highlight');
+
+                // Add metadata as data attributes
+                mark.setAttribute('data-claim-type', claim.claim_type || 'unknown');
+                mark.setAttribute('data-claim-text', claim.claim || '');
+
+                if (claim.evidence_type && claim.evidence_type.length > 0) {
+                    mark.setAttribute('data-evidence-types', claim.evidence_type.join(','));
+                }
+
+                if (claim.source_type && claim.source_type.length > 0) {
+                    mark.setAttribute('data-source-types', claim.source_type.join(','));
+                }
+
+                enhanced++;
+            } else {
+                console.warn(`[Claim Highlighting] No metadata found for claim ${claimId}`);
+            }
+        });
+
+        console.log(`[Claim Highlighting] Enhanced ${enhanced}/${marks.length} marks with metadata`);
+        return enhanced;
+    }
+
+    /**
      * Initialize claim highlighting
      * @param {HTMLElement} container - Container with manuscript content
      * @param {Array} claims - Array of claim objects
@@ -337,10 +391,16 @@ const ClaimHighlighter = (function() {
             return;
         }
 
-        // Highlight all claims
-        highlightAllClaims(container, claims);
+        // First, check for pre-existing <mark> tags from annotated XML
+        const preHighlightedCount = enhanceExistingMarks(container, claims);
 
-        // Add click handlers to highlighted claims
+        // If no pre-highlighted marks found, fall back to fuzzy text matching
+        if (preHighlightedCount === 0) {
+            console.log('[Claim Highlighting] Falling back to fuzzy text matching...');
+            highlightAllClaims(container, claims);
+        }
+
+        // Add click handlers to all highlighted claims (both pre-existing and fuzzy-matched)
         container.addEventListener('click', function(event) {
             const highlight = event.target.closest('.claim-highlight');
             if (highlight) {
