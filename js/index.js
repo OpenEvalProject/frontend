@@ -39,8 +39,8 @@ async function loadStatistics() {
 
 async function loadManuscripts() {
   try {
-    // Fetch manuscripts with reasonable limit for performance (DataTables handles display pagination)
-    const response = await fetch("/api/manuscripts?limit=200", {
+    // Fetch only recent manuscripts for faster initial load
+    const response = await fetch("/api/manuscripts?limit=50", {
       credentials: "include",
     });
 
@@ -98,7 +98,7 @@ async function loadManuscripts() {
       ];
     });
 
-    // Initialize DataTables
+    // Initialize DataTables with performance optimizations
     manuscriptsTable = $("#papers-list").DataTable({
       data: tableData,
       columns: [
@@ -116,8 +116,9 @@ async function loadManuscripts() {
         { title: "ID", visible: false, searchable: false }, // Hidden ID column
       ],
       pageLength: 10,
-      lengthMenu: [10, 25, 50, 100],
+      lengthMenu: [10, 25, 50],
       order: [[1, "desc"]], // Sort by date descending by default (now column 1)
+      deferRender: true, // Only create HTML elements for visible rows
       responsive: true,
       language: {
         search: "Search manuscripts:",
