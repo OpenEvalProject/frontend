@@ -19,10 +19,14 @@
       <nav>
         <a href="/index.html">← Back to Manuscripts</a>
         <a href="/papers-search.html"><button>Search Papers</button></a>
+        <!-- Explore Results section - temporarily disabled
         <a href="/results.html"><button>Explore Results</button></a>
+        -->
+        <!-- ORCID Login - temporarily disabled for future use
         <span id="user-info"></span>
         <button id="login-btn">Login with ORCID</button>
         <button id="logout-btn" style="display: none">Logout</button>
+        -->
       </nav>
     </header>
 
@@ -132,6 +136,20 @@
                 >
                   <div class="stat-value" id="total-comparisons">0</div>
                   <div class="stat-label">Comparisons</div>
+                  <div class="stat-breakdown-mini" id="comparison-breakdown" style="display: none">
+                    <span class="mini-badge agree-badge"
+                      ><span id="agree-count-badge">0</span></span
+                    >
+                    <span class="mini-badge partial-badge"
+                      ><span id="partial-count-badge">0</span></span
+                    >
+                    <span class="mini-badge disagree-badge"
+                      ><span id="disagree-count-badge">0</span></span
+                    >
+                    <span class="mini-badge disjoint-badge"
+                      ><span id="disjoint-count-badge">0</span></span
+                    >
+                  </div>
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ let manuscriptsTable;
 
 $(document).ready(async function () {
   // Check authentication status
-  await checkAuthStatus();
+  // await checkAuthStatus(); // ORCID login temporarily disabled
 
   // Load statistics
   await loadStatistics();
@@ -39,8 +39,8 @@ async function loadStatistics() {
 
 async function loadManuscripts() {
   try {
-    // Fetch all manuscripts (no pagination, DataTables will handle it)
-    const response = await fetch("/api/manuscripts?limit=10000", {
+    // Fetch manuscripts with reasonable limit for performance (DataTables handles display pagination)
+    const response = await fetch("/api/manuscripts?limit=200", {
       credentials: "include",
     });
 

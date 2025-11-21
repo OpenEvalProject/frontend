@@ -1,6 +1,6 @@
 $(document).ready(async function() {
     // Check authentication status
-    await checkAuthStatus();
+    // await checkAuthStatus(); // ORCID login temporarily disabled
 
     // Get manuscript ID from URL
     const urlParams = new URLSearchParams(window.location.search);

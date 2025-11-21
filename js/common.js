@@ -1,5 +1,7 @@
 // Common utilities and authentication checks
 
+// ORCID Authentication - temporarily disabled for future use
+/*
 // Check if user is authenticated
 async function checkAuthStatus() {
     try {
@@ -44,3 +46,4 @@ $(document).on('click', '#logout-btn', async function() {
         console.error('Logout failed:', error);
     }
 });
+*/
