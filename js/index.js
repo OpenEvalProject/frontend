@@ -39,8 +39,8 @@ async function loadStatistics() {
 
 async function loadManuscripts() {
   try {
-    // Fetch only recent manuscripts for faster initial load
-    const response = await fetch("/api/manuscripts?limit=50", {
+    // Fetch all manuscripts (backend query optimized for performance)
+    const response = await fetch("/api/manuscripts?limit=1000", {
       credentials: "include",
     });
 
@@ -115,8 +115,8 @@ async function loadManuscripts() {
         { title: "Disjoint", width: "5%" },
         { title: "ID", visible: false, searchable: false }, // Hidden ID column
       ],
-      pageLength: 10,
-      lengthMenu: [10, 25, 50],
+      pageLength: 25,
+      lengthMenu: [10, 25, 50, 100],
       order: [[1, "desc"]], // Sort by date descending by default (now column 1)
       deferRender: true, // Only create HTML elements for visible rows
       responsive: true,
