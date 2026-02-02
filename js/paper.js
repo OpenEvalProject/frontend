@@ -110,8 +110,13 @@ async function loadManuscript(manuscriptId) {
 }
 
 function populateManuscriptHeader(metadata) {
-    // Set manuscript ID badge in left column header
-    $('#manuscript-id-badge').text(metadata.id);
+    // Add DOI link to manuscript header
+    if (metadata.doi) {
+        const doiUrl = `https://doi.org/${metadata.doi}`;
+        $('#manuscript-title-compact').html(
+            `Manuscript: <a href="${doiUrl}" target="_blank" rel="noopener" class="doi-link">${metadata.doi}</a>`
+        );
+    }
 }
 
 function populateSummaryStats(stats) {
