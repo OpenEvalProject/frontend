@@ -1,5 +1,11 @@
 // Common utilities and authentication checks
 
+// Stub function while auth is disabled
+function checkAuthStatus() {
+    // Auth temporarily disabled - return false (not authenticated)
+    return Promise.resolve(false);
+}
+
 // ORCID Authentication - temporarily disabled for future use
 /*
 // Check if user is authenticated
