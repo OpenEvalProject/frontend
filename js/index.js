@@ -8,8 +8,13 @@ $(document).ready(async function () {
   // Load statistics
   await loadStatistics();
 
-  // Load manuscripts table
+  // Load manuscripts table with default sort
   await loadManuscripts();
+
+  // Handle sort dropdown change
+  $('#sort-select').on('change', async function() {
+    await loadManuscripts();
+  });
 });
 
 async function loadStatistics() {
@@ -39,8 +44,11 @@ async function loadStatistics() {
 
 async function loadManuscripts() {
   try {
-    // Fetch all manuscripts (backend query optimized for performance)
-    const response = await fetch("/api/manuscripts?limit=1000", {
+    // Get sort option from dropdown
+    const sortBy = $('#sort-select').val() || 'newest';
+
+    // Fetch manuscripts with sort parameter
+    const response = await fetch(`/api/manuscripts?limit=1000&sort_by=${sortBy}`, {
       credentials: "include",
     });
 
@@ -94,6 +102,14 @@ async function loadManuscripts() {
       ];
     });
 
+    // If table already exists, just update the data
+    if (manuscriptsTable) {
+      manuscriptsTable.clear();
+      manuscriptsTable.rows.add(tableData);
+      manuscriptsTable.draw();
+      return;
+    }
+
     // Initialize DataTables with performance optimizations
     manuscriptsTable = $("#papers-list").DataTable({
       data: tableData,
@@ -113,7 +129,8 @@ async function loadManuscripts() {
       ],
       pageLength: 25,
       lengthMenu: [10, 25, 50, 100],
-      order: [[1, "desc"]], // Sort by date descending by default (now column 1)
+      order: [], // Disable default sorting - backend handles sorting
+      ordering: false, // Disable column header sorting
       deferRender: true, // Only create HTML elements for visible rows
       responsive: true,
       searching: false, // Disable search bar

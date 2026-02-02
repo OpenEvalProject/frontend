@@ -381,6 +381,41 @@ section {
     overflow-x: auto;
 }
 
+.papers-table .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.papers-table .table-header h2 {
+    margin: 0;
+}
+
+.sort-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-control label {
+    font-weight: 500;
+    color: #555;
+}
+
+.sort-control select {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+.sort-control select:hover {
+    border-color: #3498db;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
