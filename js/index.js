@@ -76,18 +76,18 @@ async function loadManuscripts() {
         }</a>`,
         manuscript.total_claims,
         manuscript.total_results_llm,
-        manuscript.has_peer_reviews ? manuscript.total_results_peer : '-',
-        manuscript.has_peer_reviews ? manuscript.total_comparisons : '-',
-        manuscript.has_peer_reviews
+        manuscript.total_results_peer > 0 ? manuscript.total_results_peer : '-',
+        manuscript.total_results_peer > 0 ? manuscript.total_comparisons : '-',
+        manuscript.total_results_peer > 0
           ? `<span class="agree-badge">${manuscript.agree_count || 0}</span>`
           : '-',
-        manuscript.has_peer_reviews
+        manuscript.total_results_peer > 0
           ? `<span class="partial-badge">${manuscript.partial_count || 0}</span>`
           : '-',
-        manuscript.has_peer_reviews
+        manuscript.total_results_peer > 0
           ? `<span class="disagree-badge">${manuscript.disagree_count || 0}</span>`
           : '-',
-        manuscript.has_peer_reviews
+        manuscript.total_results_peer > 0
           ? `<span class="disjoint-badge">${manuscript.disjoint_count || 0}</span>`
           : '-',
         manuscript.id, // Hidden column for row click handling
