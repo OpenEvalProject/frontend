@@ -5,15 +5,23 @@ $(document).ready(async function () {
   // Check authentication status
   // await checkAuthStatus(); // ORCID login temporarily disabled
 
+  // Get sort from URL parameter, default to most_disagree
+  const urlParams = new URLSearchParams(window.location.search);
+  const sortBy = urlParams.get('sort') || 'most_disagree';
+
+  // Set dropdown to match URL parameter
+  $('#sort-select').val(sortBy);
+
   // Load statistics
   await loadStatistics();
 
-  // Load manuscripts table with default sort
+  // Load manuscripts table
   await loadManuscripts();
 
-  // Handle sort dropdown change
-  $('#sort-select').on('change', async function() {
-    await loadManuscripts();
+  // Handle sort dropdown change - reload page with new sort parameter
+  $('#sort-select').on('change', function() {
+    const newSort = $(this).val();
+    window.location.href = `/?sort=${newSort}`;
   });
 });
 
@@ -102,13 +110,6 @@ async function loadManuscripts() {
       ];
     });
 
-    // If table already exists, just update the data
-    if (manuscriptsTable) {
-      manuscriptsTable.clear();
-      manuscriptsTable.rows.add(tableData);
-      manuscriptsTable.draw();
-      return;
-    }
 
     // Initialize DataTables with performance optimizations
     manuscriptsTable = $("#papers-list").DataTable({
