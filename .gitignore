@@ -64,3 +64,5 @@ coverage/
 *.css.map
 *.sass.map
 *.scss.map
+Caddyfile.local
+claim_verification.db
